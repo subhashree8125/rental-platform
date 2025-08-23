@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1470&q=80") no-repeat center center/cover;
+      background-size: cover;
+      color: #fff;
+      position: relative;
+      backdrop-filter:blur(3px);
+    }
+
+    /* Overlay for readability */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.55);
+      z-index: -1;
+    }
+
+    /* Header */
+    header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-weight: 700;
+      font-size: 1.6rem;
+      color: #ffcb05;
+    }
+
+    .header-buttons button {
+      margin-right: 2rem;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .post-btn {
+      background: #ffcb05;
+      color: #000;
+      
+    }
+    .login-btn {
+      background: #fff;
+      color: #000;
+    }
+
+    .header-buttons button:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+
+    /* Main Section */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    main h2 {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      max-width: 900px;
+    }
+
+    main p.subtext {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      color: #ffcb05;
+    }
+
+    /* Features Section */
+    .features {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .feature-card {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(6px);
+      border-radius: 15px;
+      padding: 1.5rem;
+      max-width: 280px;
+      flex: 1;
+      min-width: 240px;
+      transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .feature-card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+      color: #ffcb05;
+    }
+
+    .feature-card p {
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    /* Footer */
+    footer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 2rem 1rem;
+    }
+
+    .explore-btn {
+      background: #ffcb05;
+      color: #000;
+      padding: 0.8rem 2rem;
+      border: none;
+      border-radius: 30px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .explore-btn:hover {
+      background: #fff;
+      color: #000;
+    }
+
+    .logo img {
+  height: 120px;  /* adjust size */
+  width: 150px;
+
+}
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      main h2 {
+        font-size: 1.6rem;
+      }
+      header h1 {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo">
+        <a href="index.html">
+  <img src="logo.png" alt="BROKLINK Logo" class="logo">
+</a>
+  </div>
+    <div class="header-buttons">
+      <button class="post-btn" onclick="location.href='postproperty.html'">Post Property</button>
+      <button class="login-btn" onclick="location.href='login.html'">Login</button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <h2>"Finding a home has never been easier – connect, rent, and live happily."</h2>
+    <p class="subtext">Here’s Why We’re Your Best Choice</p>
+
+    <div class="features">
+      <div class="feature-card">
+        <h3>Easy Listings</h3>
+        <p>Post your property in minutes and reach the right audience.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Smart Search</h3>
+        <p>Find houses quickly with advanced filters that match your needs.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Trusted Deals</h3>
+        <p>Transparent rental agreements to ensure safety and trust.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <button class="explore-btn" onclick="location.href='explore.html'">Explore Properties</button>
+
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BROKLINK - Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background:url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1470&q=80") no-repeat center center/cover;
+      background-size: cover;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      backdrop-filter: blur(12px);
+    }
+
+    /* ✅ HEADER WITH LOGO IN TOP-LEFT */
+    header {
+      position: absolute;
+      top: 10px;
+      left: 20px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+    }
+
+    .logo img {
+      height: 100px;
+      width: 150px;
+    }
+
+    .container {
+      display: flex;
+      justify-content: space-between;
+      padding: 2px;
+      align-items: center;
+      width: 80%;
+      max-width: 1100px;
+      color: #fff;
+    }
+
+    /* LEFT SIDE QUOTES */
+    .quotes {
+      max-width: 500px;
+    }
+
+    .quotes h1 {
+      font-size: 50px;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    .quotes p {
+      font-size: 18px;
+      line-height: 1.6;
+      opacity: 0.9;
+    }
+
+    /* RIGHT SIDE LOGIN BOX */
+    .login-card {
+      width: 350px;
+      padding: 40px;
+      background: rgba(0, 0, 0, 0.5); /* transparent glass */
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .login-card h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+
+    .login-card input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+
+    .login-card input::placeholder {
+      color: #eee;
+    }
+
+    .options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin: 10px 0;
+    }
+
+    .options label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .login-card button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      background: #ff5722;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .login-card button:hover {
+      background: #e64a19;
+    }
+
+    .login-card a {
+      font-size: 13px;
+      color: #ddd;
+      text-decoration: none;
+    }
+
+    .login-card a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive */
+    @media(max-width: 900px) {
+      .container {
+        flex-direction: column;
+        text-align: center;
+      }
+      .quotes {
+        margin-bottom: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- ✅ LOGO FIXED IN TOP-LEFT -->
+  <header>
+    <div class="logo">
+    <a href="index.html">
+  <img src="logo.png" alt="BROKLINK Logo" class="logo">
+</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- LEFT SIDE QUOTES -->
+    <div class="quotes">
+      <h1 id="wel">Welcome Back</h1>
+      <p id="quote-text">"Your next rental home is just a click away.  
+         Discover comfort, convenience, and the perfect place to call home with BROKLINK."</p>
+    </div>
+
+    <!-- RIGHT SIDE LOGIN -->
+    <div class="login-card">
+      <h2>Login</h2>
+      <!-- ✅ Changed placeholder -->
+      <input type="text" id="email" placeholder="Email or Phone Number">
+      <input type="password" id="password" placeholder="Password">
+
+      <div class="options">
+        <label><input type="checkbox"> Remember Me</label>
+        <a href="#">Forgot Password?</a>
+      </div>
+
+      <button onclick="login()">Login</button>
+
+      <!-- ✅ Signup Option -->
+      <p style="text-align:center; margin-top:15px; font-size:14px;">
+        Don't have an account? 
+        <a href="signup.html" style="color:#ff9800; font-weight:600;">Sign Up</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // QUOTES LIST
+    const quotes = [
+      "Your next rental home is just a click away. Discover comfort, convenience, and the perfect place to call home with BROKLINK.",
+      "Find a space that fits your life. Simple, quick, and reliable rentals — only with BROKLINK.",
+      "Turning houses into homes. Start your rental journey with us today.",
+      "From budget-friendly to luxury living — explore endless rental options at your fingertips."
+    ];
+
+    // Change quote every 5 seconds
+    let index = 0;
+    setInterval(() => {
+      index = (index + 1) % quotes.length;
+      document.getElementById("quote-text").innerText = quotes[index];
+    }, 5000);
+
+    // Login demo
+    function login() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      if (!email || !password) {
+        alert("Please enter Email/Number and Password!");
+      } else {
+        alert("Login Successful!");
+      }
+    }
+  </script>
+
+</body>
+</html>

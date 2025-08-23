@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BROKLINK - Post Property</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      background: url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1470&q=80") no-repeat center center/cover;
+    }
+
+    /* Overlay for blur effect */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4); /* dark tint */
+      backdrop-filter: blur(8px);
+      z-index: -1; /* behind content */
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 10px 20px;
+      z-index: 10;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    .logo img {
+      height: 100px;
+      width: 150px;
+    }
+
+    .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 80%;
+      max-width: 1100px;
+      margin: 120px auto 40px; /* push below header */
+      color: #fff;
+      gap: 40px;
+    }
+
+    /* LEFT SIDE QUOTES */
+    .quotes {
+      max-width: 500px;
+      padding-block: 20cap;
+    }
+
+    .quotes h1 {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    .quotes p {
+      font-size: 18px;
+      line-height: 1.6;
+      opacity: 0.9;
+    }
+
+    /* RIGHT SIDE FORM CARD */
+    .property-card {
+      width: 420px;
+      padding: 40px;
+      background: rgba(0,0,0,0.5); /* glass */
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+
+    .property-card h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+
+    .property-card input,
+    .property-card select,
+    .property-card textarea {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+    }
+
+    .property-card textarea {
+      resize: none;
+      height: 80px;
+    }
+
+    .property-card input::placeholder,
+    .property-card textarea::placeholder {
+      color: #eee;
+    }
+
+    /* ✅ Styling select dropdown */
+    .property-card select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .property-card option {
+      background: #333; /* dark dropdown */
+      color: #fff;
+    }
+
+    .property-card button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      background: #ff5722;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .property-card button:hover {
+      background: #e64a19;
+    }
+
+    /* Responsive */
+    @media(max-width: 900px) {
+      .container {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .quotes { margin-bottom: 30px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Overlay -->
+  <div class="overlay"></div>
+
+  <!-- Header with logo -->
+  <header>
+    <div class="logo">
+    <a href="index.html">
+  <img src="logo.png" alt="BROKLINK Logo" class="logo">
+</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- LEFT SIDE QUOTES -->
+    <div class="quotes">
+      <h1>Post Your Property</h1>
+      <p id="quote-text">"A perfect tenant is just one step away – list your property with confidence."</p>
+    </div>
+
+    <!-- RIGHT SIDE FORM -->
+    <div class="property-card">
+      <h2>Property Details</h2>
+      <form id="propertyForm">
+        <input type="text" placeholder="Full Name" required>
+        <input type="tel" placeholder="Contact Number" pattern="[0-9]{10}" required>
+        <textarea placeholder="House Address" required></textarea>
+        
+        <select required>
+          <option value="">Select House Type</option>
+          <option>1BHK</option>
+          <option>2BHK</option>
+          <option>3BHK</option>
+          <option>4+ BHK</option>
+        </select>
+
+        <!-- ✅ Default 0 values -->
+        <input type="number" placeholder="Rent Price (₹)" value="0" min="0" required>
+        <input type="number" placeholder="Bedrooms" value="0" min="0" required>
+        <input type="number" placeholder="Bathrooms" value="0" min="0" required>
+
+        <select required>
+          <option value="">Furnishing</option>
+          <option>Furnished</option>
+          <option>Semi-Furnished</option>
+          <option>Unfurnished</option>
+        </select>
+          <select required>
+          <option value="">Property type</option>
+              <option>Flat</option>
+          <option>House</option>
+          <option>PG</option>
+          <option>Hostel</option>
+        </select>
+
+        <input type="file" required>
+        
+        <button type="submit">Post Property</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // QUOTES LIST
+    const quotes = [
+      "A perfect tenant is just one step away – list your property with confidence.",
+      "Turn your property into an opportunity. Connect with the right tenants through BROKLINK.",
+      "Post today, rent tomorrow – simple, fast, and reliable with BROKLINK.",
+      "Every space has a story. Let your property reach the people who value it most."
+    ];
+
+    // Change quote every 5s
+    let index = 0;
+    setInterval(() => {
+      index = (index + 1) % quotes.length;
+      document.getElementById("quote-text").innerText = quotes[index];
+    }, 5000);
+
+    // Form submission
+    document.getElementById("propertyForm").addEventListener("submit", function(e){
+      e.preventDefault();
+      alert("Property Listed Successfully!");
+    });
+  </script>
+</body>
+</html>
