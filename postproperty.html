@@ -156,8 +156,8 @@
   <header>
     <div class="logo">
     <a href="index.html">
-  <img src="logo.png" alt="BROKLINK Logo" class="logo">
-</a>
+      <img src="logo.png" alt="BROKLINK Logo" class="logo">
+    </a>
     </div>
   </header>
 
@@ -176,18 +176,19 @@
         <input type="tel" placeholder="Contact Number" pattern="[0-9]{10}" required>
         <textarea placeholder="House Address" required></textarea>
         
-        <select required>
+        <select id="houseType" required>
           <option value="">Select House Type</option>
-          <option>1BHK</option>
-          <option>2BHK</option>
-          <option>3BHK</option>
-          <option>4+ BHK</option>
+          <option value="HK">HK</option>
+          <option value="1BHK">1BHK</option>
+          <option value="2BHK">2BHK</option>
+          <option value="3BHK">3BHK</option>
+          <option value="4+ BHK">4+ BHK</option>
         </select>
 
         <!-- ✅ Default 0 values -->
-        <input type="number" placeholder="Rent Price (₹)" value="0" min="0" required>
-        <input type="number" placeholder="Bedrooms" value="0" min="0" required>
-        <input type="number" placeholder="Bathrooms" value="0" min="0" required>
+        <input type="number" placeholder="Rent Price (₹)" min="0" required>
+        <input type="number" id="bedrooms" placeholder="Bedrooms" value=" " min="0" required>
+        <input type="number" placeholder="Bathrooms" value="" min="0" required>
 
         <select required>
           <option value="">Furnishing</option>
@@ -195,9 +196,9 @@
           <option>Semi-Furnished</option>
           <option>Unfurnished</option>
         </select>
-          <select required>
+        <select required>
           <option value="">Property type</option>
-              <option>Flat</option>
+          <option>Flat</option>
           <option>House</option>
           <option>PG</option>
           <option>Hostel</option>
@@ -225,6 +226,19 @@
       index = (index + 1) % quotes.length;
       document.getElementById("quote-text").innerText = quotes[index];
     }, 5000);
+
+    // ✅ Handle HK case
+    const houseType = document.getElementById("houseType");
+    const bedrooms = document.getElementById("bedrooms");
+
+    houseType.addEventListener("change", () => {
+      if (houseType.value === "HK") {
+        bedrooms.value = 0;
+        bedrooms.disabled = true; // lock
+      } else {
+        bedrooms.disabled = false; // allow editing
+      }
+    });
 
     // Form submission
     document.getElementById("propertyForm").addEventListener("submit", function(e){
