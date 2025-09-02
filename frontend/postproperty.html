@@ -155,6 +155,7 @@
       <a href="index.html">
         <img src="img/logo.png" alt="BROKLINK Logo">
       </a>
+
     </div>
   </header>
 
@@ -172,6 +173,7 @@
         <input type="text" placeholder="Full Name" required>
         <input type="tel" placeholder="Contact Number" pattern="[0-9]{10}" required>
         <textarea placeholder="House Address" required></textarea>
+
 
         <select required>
           <option value="">Property Type</option>
@@ -211,6 +213,13 @@
           <option>Furnished</option>
           <option>Semi-Furnished</option>
           <option>Unfurnished</option>
+        </select>
+        <select required>
+          <option value="">Property type</option>
+          <option>Flat</option>
+          <option>House</option>
+          <option>PG</option>
+          <option>Hostel</option>
         </select>
 
        <textarea placeholder="Description"
@@ -279,9 +288,10 @@
     houseType.addEventListener("change", () => {
       if (houseType.value === "HK") {
         bedrooms.value = 0;
-        bedrooms.disabled = true;
+        bedrooms.disabled = true; // lock
       } else {
-        bedrooms.disabled = false;
+        bedrooms.disabled = false; // allow editing
+
       }
     });
 
