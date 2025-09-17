@@ -1,13 +1,8 @@
-from pymongo import MongoClient
 import os
-from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
-
-MONGO_URI = os.getenv("MONGO_URI")
-JWT_SECRET = os.getenv("JWT_SECRET")
-
-# Connect to MongoDB
-client = MongoClient(MONGO_URI)
-db = client.get_database()  # rental_platform DB
+class Config:
+    SECRET_KEY = os.environ.get("SECRET_KEY", "broklink_secret")
+    SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:Hari%405502@localhost:3306/broklink"
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    UPLOAD_FOLDER = 'uploads/'
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}  # Allowed image formats
