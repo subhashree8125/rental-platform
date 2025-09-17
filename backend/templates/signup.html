@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BROKLINK - Signup</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header>
+  <div class="logo">
+    <a href="{{ url_for('index') }}">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="BROKLINK LOGO">
+    </a>
+  </div>
+</header>
+
+<div class="container">
+  <div class="left-side">
+    <h1>Join Us</h1>
+    <p id="quote-text">
+      "Discover comfort, convenience, and the perfect place to call home with BROKLINK."
+    </p>
+  </div>
+
+  <div class="signup-card">
+    <h2>Create Account</h2>
+    <input type="text" id="fullname" placeholder="Full Name">
+    <input type="email" id="email" placeholder="Email">
+    <input type="text" id="mobile" placeholder="Mobile Number">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="signup()">Sign Up</button>
+    <p class="error-msg" id="errorMsg"></p>
+    <p style="margin-top:15px; font-size:14px;">
+      Already have an account? 
+      <a href="{{ url_for('login_page') }}" style="color:#ffcb05; font-weight:600;">Login</a>
+    </p>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/signup.js') }}"></script>
+</body>
+</html>

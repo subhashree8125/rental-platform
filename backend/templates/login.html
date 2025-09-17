@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BROKLINK - Login</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header>
+  <div class="logo">
+    <a href="{{ url_for('index') }}">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="BROKLINK LOGO">
+    </a>
+  </div>
+</header>
+
+<div class="container">
+  <div class="left-side">
+    <h1>Welcome Back</h1>
+    <p id="quote-text">
+      "Your next rental home is just a click away. Discover comfort, convenience, and the perfect place to call home with BROKLINK."
+    </p>
+  </div>
+
+  <div class="login-card">
+    <h2>Login</h2>
+    <input type="text" id="identifier" placeholder="Email or Phone Number">
+    <input type="password" id="password" placeholder="Password">
+    <div class="options">
+      <label><input type="checkbox"> Remember Me</label>
+      <a href="#">Forgot Password?</a>
+    </div>
+    <button onclick="login()">Login</button>
+    <p class="error-msg" id="errorMsg"></p>
+    <p style="margin-top:15px; font-size:14px;">
+      Don’t have an account? 
+      <a href="{{ url_for('signup_page') }}" style="color:#ffcb05; font-weight:600;">Sign Up</a>
+    </p>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+</body>
+</html>

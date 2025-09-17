@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BROKLINK - Explore Properties</title>
-  <link rel="icon" type="image/png" href="img/logo.png">
+  <link rel="icon" type="image/png" href="/backend/static/img/logo.png">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
@@ -41,6 +41,25 @@
     .accordion button.active:after{content:"-";}
     .panel{display:none;padding:10px 0;}
     .panel label{display:block;font-size:14px;margin:5px 0;}
+
+    /* Filter buttons */
+    .filter-buttons{
+      display:flex;
+      gap:10px;
+      margin-bottom:15px;
+    }
+    .filter-buttons button{
+      flex:1;
+      padding:8px;
+      border:none;
+      border-radius:6px;
+      font-weight:600;
+      cursor:pointer;
+      transition:.3s;
+    }
+    .apply-btn{background:#ffcb05;color:#1e2a38;}
+    .clear-btn{background:#e0e0e0;color:#1e2a38;}
+    .apply-btn:hover,.clear-btn:hover{opacity:.85;}
 
     /* Gallery */
     .gallery{
@@ -90,12 +109,14 @@
   <!-- Header -->
   <header>
     <div class="logo">
-        <a href="index.html" style="text-decoration:none; color: inherit;"></a>
-      <img src="img/logo.png" alt="BROKLINK Logo">
-    </div>
+    <a href="/">
+      <link rel="icon" type="image/png" href="/static/img/logo.png">
+      <img src="/static/img/logo.png" alt="BROKLINK LOGO">
+    </a>
+  </div>
     <div class="header-buttons">
-      <button class="post-btn" onclick="location.href='postproperty.html'">Post Property</button>
-      <button class="login-btn" onclick="location.href='login.html'">Login</button>
+      <button class="post-btn" onclick="location.href='postproperty'">Post Property</button>
+      <button class="login-btn" onclick="location.href='login'">Login</button>
     </div>
   </header>
 
@@ -103,6 +124,12 @@
   <div class="container">
     <!-- Sidebar Filters -->
     <aside>
+      <!-- Filter Buttons -->
+      <div class="filter-buttons">
+        <button id="applyFilterBtn" class="apply-btn">Apply Filter</button>
+        <button id="clearFilterBtn" class="clear-btn">Clear Filter</button>
+      </div>
+
       <!-- District -->
       <div class="accordion">
         <button onclick="toggleAccordion(this)">District</button>
@@ -174,16 +201,6 @@
         </div>
       </div>
 
-      <!-- Type -->
-      <div class="accordion">
-        <button onclick="toggleAccordion(this)">Type</button>
-        <div class="panel">
-            <label><input type="checkbox" value="Any"> Any</label>
-          <label><input type="checkbox" value="Family"> Family</label>
-          <label><input type="checkbox" value="Bachelor"> Bachelor</label>
-        </div>
-      </div>
-
       <!-- Facing -->
       <div class="accordion">
         <button onclick="toggleAccordion(this)">Facing</button>
@@ -229,27 +246,28 @@
     };
 
     // Update Areas when District changes
+    function updateAreas(){
+      const checkedDistrict=document.querySelector("input[name='district']:checked");
+      const panel=document.getElementById("areasPanel");
+      panel.innerHTML="";
+      if(!checkedDistrict){
+        panel.innerHTML="<p>Select a district first</p>";
+        return;
+      }
+      let d=checkedDistrict.value;
+      if(areasByCity[d]){
+        const cityTitle=document.createElement("h4");
+        cityTitle.innerText=d;
+        panel.appendChild(cityTitle);
+        areasByCity[d].forEach(a=>{
+          const lbl=document.createElement("label");
+          lbl.innerHTML = `<input type="checkbox" value="${a}" class="area"> ${a}`;
+          panel.appendChild(lbl);
+        });
+      }
+    }
     document.querySelectorAll("input[name='district']").forEach(rb=>{
-      rb.addEventListener("change",()=>{
-        const checkedDistrict=document.querySelector("input[name='district']:checked");
-        const panel=document.getElementById("areasPanel");
-        panel.innerHTML="";
-        if(!checkedDistrict){
-          panel.innerHTML="<p>Select a district first</p>";
-          return;
-        }
-        let d=checkedDistrict.value;
-        if(areasByCity[d]){
-          const cityTitle=document.createElement("h4");
-          cityTitle.innerText=d;
-          panel.appendChild(cityTitle);
-          areasByCity[d].forEach(a=>{
-            const lbl=document.createElement("label");
-            lbl.innerHTML = `<input type="checkbox" value="${a}"> ${a}`;
-            panel.appendChild(lbl);
-          });
-        }
-      });
+      rb.addEventListener("change",updateAreas);
     });
 
     // Budget slider
@@ -282,6 +300,10 @@
 
     function renderProperties(list){
       gallery.innerHTML="";
+      if(list.length===0){
+        gallery.innerHTML="<p style='grid-column:1/-1;text-align:center;font-size:18px;color:#555;'>No properties found.</p>";
+        return;
+      }
       list.forEach(p=>{
         const card=document.createElement("div");
         card.className="property-card";
@@ -312,12 +334,66 @@
     }
 
     function closeModal(){modal.style.display="none";}
-
     function toggleAccordion(btn){
       btn.classList.toggle("active");
       const panel=btn.nextElementSibling;
       panel.style.display=panel.style.display==="block"?"none":"block";
     }
+
+    // Apply filters
+    document.getElementById("applyFilterBtn").addEventListener("click",()=>{
+      let filtered=properties.slice();
+
+      // District
+      const district=document.querySelector("input[name='district']:checked")?.value;
+      if(district) filtered=filtered.filter(p=>p.district===district);
+
+      // Areas
+      const areaEls=document.querySelectorAll(".area:checked");
+      if(areaEls.length>0){
+        const areas=[...areaEls].map(a=>a.value);
+        filtered=filtered.filter(p=>areas.includes(p.area));
+      }
+
+      // Property Type
+      const typeEls=document.querySelectorAll("aside .panel input[type='checkbox']:checked");
+      const types=[...typeEls].map(a=>a.value).filter(v=>v!=="Any");
+      if(types.length>0) filtered=filtered.filter(p=>types.includes(p.type));
+
+      // BHK
+      const bhk=document.querySelector("input[name='bhk']:checked")?.value;
+      if(bhk) filtered=filtered.filter(p=>p.bhk===bhk || (bhk==="4 and more" && parseInt(p.bhk)>=4));
+
+      // Budget
+      let min=parseInt(minBudget.value), max=parseInt(maxBudget.value);
+      if(min>max) [min,max]=[max,min];
+      filtered=filtered.filter(p=>p.price>=min && p.price<=max);
+
+      // Parking
+      const parking=document.querySelector("input[name='parking']:checked")?.value;
+      if(parking && parking!=="Any") filtered=filtered.filter(p=>p.parking===parking);
+
+      // Pets
+      const pets=document.querySelector("input[name='pets']:checked")?.value;
+      if(pets && pets!=="Any") filtered=filtered.filter(p=>p.pets===pets);
+
+      // Facing
+      const facingEls=document.querySelectorAll("aside .panel input[type='checkbox']:checked");
+      const facings=[...facingEls].map(f=>f.value).filter(v=>["East","West","North","South","Northeast","Northwest","Southeast","Southwest"].includes(v));
+      if(facings.length>0) filtered=filtered.filter(p=>facings.includes(p.facing));
+
+      renderProperties(filtered);
+    });
+
+    // Clear filters
+    document.getElementById("clearFilterBtn").addEventListener("click",()=>{
+      document.querySelectorAll("aside input").forEach(i=>i.checked=false);
+      minBudget.value=10000;
+      maxBudget.value=40000;
+      updateBudget();
+      updateAreas();
+      renderProperties(properties);
+    });
 
     renderProperties(properties);
   </script>
