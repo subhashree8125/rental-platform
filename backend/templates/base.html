@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BROKLINK{% endblock %}</title>
+
+    <!-- Dynamic CSS -->
+    {% block css %}
+    <!-- Default CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% endblock %}
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <a href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="BROKLINK Logo">
+            </a>
+        </div>
+        <div class="header-buttons">
+            {% if session.get('user') %}
+                <a href="{{ url_for('profile_page') }}" class="profile-btn">{{ session['user']['full_name'] }}</a>
+                <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login_page') }}" class="login-btn">Login</a>
+                <a href="{{ url_for('signup_page') }}" class="post-btn">Signup</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Page Content -->
+    <main>
+        {% block content %}
+        <!-- Page-specific content goes here -->
+        {% endblock %}
+    </main>
+
+    <!-- Dynamic JS -->
+    {% block scripts %}
+    <!-- Add page-specific scripts if needed -->
+    {% endblock %}
+    <footer>
+    <p>&copy; 2025 BROKLINK</p>
+  </footer>
+
+</body>
+</html>

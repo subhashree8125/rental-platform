@@ -1,0 +1,68 @@
+/* =======================
+   Global Styles
+======================= */
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
+body { background:#f0f2f5; color:#333; }
+a { text-decoration: none; color: inherit; }
+
+/* =======================
+   Header
+======================= */
+header {
+  display:flex; justify-content:space-between; align-items:center;
+  background:#1e2a38; color:#fff; padding:10px 20px;
+}
+header .logo img { height:50px; }
+header .header-buttons button {
+  background:#ffcb05; border:none; border-radius:20px;
+  padding:8px 16px; cursor:pointer; font-weight:600; margin-left:8px;
+}
+header .header-buttons button:hover { opacity:.85; }
+
+/* =======================
+   Containers
+======================= */
+.container { padding:20px; display:flex; flex-direction:column; gap:30px; }
+
+/* =======================
+   Profile Section
+======================= */
+.profile-section { background:#fff; border-radius:10px; padding:20px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+.profile-info { display:flex; flex-direction:column; gap:10px; }
+.profile-photo img { width:100px; height:100px; border-radius:50%; object-fit:cover; margin-bottom:10px; }
+#editProfileBtn { background:#1e2a38; color:#ffcb05; border:none; border-radius:8px; padding:8px 12px; cursor:pointer; width:150px; }
+#editProfileBtn:hover { opacity:.85; }
+
+/* =======================
+   Properties Section
+======================= */
+.properties-section { background:#fff; border-radius:10px; padding:20px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+.property-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; margin-top:10px; }
+.property-card { background:#fff; border-radius:10px; padding:10px; box-shadow:0 3px 8px rgba(0,0,0,0.1); border:1px solid #e0e0e0; }
+.property-card h4 { font-size:16px; margin-bottom:5px; }
+.property-card p { font-size:14px; margin:2px 0; }
+
+/* =======================
+   Modal
+======================= */
+.modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:1000; }
+.modal-content { background:#fff; border-radius:10px; max-width:400px; width:90%; padding:20px; position:relative; }
+.close-btn { position:absolute; top:12px; right:12px; font-size:20px; font-weight:bold; cursor:pointer; }
+#editProfileForm { display:flex; flex-direction:column; gap:10px; }
+#editProfileForm input { padding:8px; border-radius:5px; border:1px solid #ccc; }
+#editProfileForm button { padding:10px; border:none; border-radius:8px; background:#ffcb05; color:#1e2a38; font-weight:600; cursor:pointer; }
+#editProfileForm button:hover { opacity:.85; }
+
+/* =======================
+   Buttons
+======================= */
+.profile-btn, .login-btn, .logout-btn { padding:8px 16px; border:none; border-radius:6px; font-weight:600; cursor:pointer; margin-left:8px; }
+.profile-btn { background: #3498db; color: #fff; }
+.profile-btn:hover { background: #2980b9; }
+.logout-btn { background: #e74c3c; color: #fff; }
+.logout-btn:hover { background: #c0392b; }
+
+/* =======================
+   Responsive
+======================= */
+@media(max-width:768px){ .container{flex-direction:column;} }

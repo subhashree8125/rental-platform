@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="icon" type="image/png" href="img/logo.png">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
   <title>BROKLINK - Home</title>
   <meta name="description" content="BROKLINK - Your trusted rental platform">
 
@@ -21,15 +21,24 @@
       content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.55); z-index: -1;
     }
-    header { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 1rem; }
-    header h1 { font-weight: 700; font-size: 1.6rem; color: #ffcb05; }
-    .header-buttons button {
-      margin-right: 2rem; padding: 0.6rem 1.2rem; border: none; border-radius: 25px;
-      cursor: pointer; font-weight: 600; transition: all 0.3s ease;
+
+    /* Header */
+    header {
+      width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 1rem;
+    }
+    .logo img { height: 100px; width: 150px; }
+    .header-buttons a, .header-buttons button {
+      margin-left: 10px; padding: 0.6rem 1.2rem; border: none; border-radius: 25px;
+      cursor: pointer; font-weight: 600; transition: all 0.3s ease; text-decoration: none; font-size: 14px;
     }
     .post-btn { background: #ffcb05; color: #000; }
-    .login-btn { background: #fff; color: #000; }
-    .header-buttons button:hover { transform: scale(1.05); opacity: 0.9; }
+    .login-btn { background:#ffcb05; color: #000; }
+    .signup-btn { background: #ffcb05; color: #000000; border: 2px solid #ffcb05; }
+    .profile-btn { background: #007BFF; color: #fff; }
+    .logout-btn { background: #DC3545; color: #fff; }
+    .header-buttons a:hover, .header-buttons button:hover { transform: scale(1.05); opacity: 0.9; }
+
+    /* Main Content */
     main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 2rem; }
     main h2 { font-size: 2rem; font-weight: 600; margin-bottom: 1rem; max-width: 900px; }
     main p.subtext { font-size: 1.2rem; font-weight: 600; margin-bottom: 2rem; color: #ffcb05; }
@@ -41,27 +50,35 @@
     .feature-card:hover { transform: translateY(-5px); }
     .feature-card h3 { font-size: 1.3rem; margin-bottom: 0.5rem; color: #ffcb05; }
     .feature-card p { font-size: 0.95rem; line-height: 1.4; }
+
+    /* Footer */
     footer { display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 2rem 1rem; }
     .explore-btn {
       background: #ffcb05; color: #000; padding: 0.8rem 2rem; border: none; border-radius: 30px;
       font-weight: 600; cursor: pointer; transition: all 0.3s ease;
     }
     .explore-btn:hover { background: #fff; color: #000; }
-    .logo img { height: 100px; width: 150px; }
   </style>
 </head>
 <body>
   <!-- Header -->
   <header>
     <div class="logo">
-      <a href="/">
-        <link rel="icon" type="image/png" href="/static/img/logo.png">
-        <img src="/static/img/logo.png" alt="BROKLINK LOGO">
+      <a href="{{ url_for('index') }}">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="BROKLINK LOGO">
       </a>
     </div>
     <div class="header-buttons">
-      <button class="post-btn" onclick="location.href='postproperty'">Post Property</button>
-      <button class="login-btn" onclick="location.href='login'">Login</button>
+      {% if user %}
+        <a href="{{ url_for('postproperty_page') }}" class="post-btn">Post Property</a>
+        <a href="{{ url_for('profile_page') }}" class="profile-btn">Profile 👤</a>
+        <form action="{{ url_for('logout') }}" method="get" style="display:inline;">
+          <button type="submit" class="logout-btn">Logout</button>
+        </form>
+      {% else %}
+        <a href="{{ url_for('login_page') }}" class="login-btn">Login</a>
+        <a href="{{ url_for('signup_page') }}" class="signup-btn">Sign Up</a>
+      {% endif %}
     </div>
   </header>
 
@@ -78,7 +95,17 @@
 
   <!-- Footer -->
   <footer>
-    <button class="explore-btn" onclick="location.href='explore'">Explore Properties</button>
+    <button class="explore-btn" id="exploreBtn">
+      Explore Properties
+    </button>
   </footer>
 </body>
+<script>
+  const exploreUrl = "{{ url_for('explore_page') }}";
+
+  // Add click event listener
+  document.getElementById("exploreBtn").addEventListener("click", function() {
+    window.location.href = exploreUrl;
+  });
+</script>
 </html>
