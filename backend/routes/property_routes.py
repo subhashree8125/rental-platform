@@ -1,29 +1,63 @@
-from flask import Blueprint, request, jsonify
-from datetime import datetime, timezone
-from ..db import db
+# backend/routes/property_routes.py
+from flask import Blueprint, request, jsonify, session
+from backend.db import db
+from backend.models.properties import Property
+from backend.models.users import Users
+from backend.config import Config
+import os
 
-property_bp = Blueprint("properties", __name__)
+property_routes = Blueprint("property_routes", __name__)
 
-# Example Property model
-class Property(db.Model):
-    __tablename__ = "properties"
+@property_routes.route("/api/properties", methods=["POST"])
+def create_property():
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized. Please log in."}), 401
 
-    property_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    owner_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
-    address = db.Column(db.Text, nullable=False)
-    property_type = db.Column(db.String(50), nullable=False)
-    rent_price = db.Column(db.Numeric(10,2), nullable=False)
-    created_at = db.Column(db.TIMESTAMP, default=lambda: datetime.now(timezone.utc))
+    full_name = request.form.get("full_name")
+    mobile_number = request.form.get("mobile_number")
+    address = request.form.get("address")
+    district = request.form.get("district")
+    property_type = request.form.get("property_type")
+    house_type = request.form.get("house_type")
+    rent_price = request.form.get("rent_price")
+    car_parking = request.form.get("car_parking")
+    pets = request.form.get("pets")
+    facing = request.form.get("facing")
+    furnishing = request.form.get("furnishing")
+    description = request.form.get("description")
+    images = request.files.getlist("images")
 
-    def __repr__(self):
-        return f"<Property {self.property_id}>"
+    filenames = []
+    for image in images:
+        if image:
+            filename = image.filename
+            save_path = os.path.join(Config.UPLOAD_FOLDER, filename)
+            image.save(save_path)
+            filenames.append(filename)
 
-# Dummy routes
-@property_bp.route("/list", methods=["GET"])
-def list_properties():
-    return jsonify({"message": "List of properties (dummy)"})
+    # Find the logged-in user
+    user = Users.query.filter_by(email=session["user"]).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
 
-@property_bp.route("/add", methods=["POST"])
-def add_property():
-    data = request.json
-    return jsonify({"message": "Property added (dummy)", "data": data})
+    new_property = Property(
+        owner=user,
+        full_name=full_name,
+        mobile_number=mobile_number,
+        address=address,
+        district = district,
+        property_type=property_type,
+        house_type=house_type,
+        rent_price=rent_price,
+        car_parking=car_parking,
+        pets=pets,
+        facing=facing,
+        furnishing=furnishing,
+        description=description,
+        images=",".join(filenames)
+    )
+
+    db.session.add(new_property)
+    db.session.commit()
+
+    return jsonify({"success": True, "message": "Property posted successfully!"}), 201

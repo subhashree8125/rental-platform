@@ -11,6 +11,7 @@ class Users(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(200), nullable=False)  # store hashed password
     mobile_number = db.Column(db.String(15), nullable=False)
+    profile_image = db.Column(db.String(200), nullable=True, default=None)  # ✅ profile photo path
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationship to properties (if you have Property model)
@@ -29,4 +30,4 @@ class Users(db.Model):
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
-        return f"<User id={self.user_id}, email={self.email}>"
+        return f"<User id={self.user_id}, email={self.email}, profile_image={self.profile_image}>"

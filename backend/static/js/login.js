@@ -1,5 +1,7 @@
-const API_URL = "http://127.0.0.1:5000/auth/login";
+// Backend login API endpoint
+const API_URL = "/auth/login";
 
+// Rotating quotes
 const quotes = [
   "Your next rental home is just a click away...",
   "Find a space that fits your life...",
@@ -9,11 +11,17 @@ const quotes = [
 
 let index = 0;
 setInterval(() => {
-  index = (index + 1) % quotes.length;
-  document.getElementById("quote-text").innerText = quotes[index];
+  const quoteElem = document.getElementById("quote-text");
+  if (quoteElem) {
+    index = (index + 1) % quotes.length;
+    quoteElem.innerText = quotes[index];
+  }
 }, 5000);
 
-async function login() {
+// Login function
+async function login(event) {
+  if (event) event.preventDefault();
+
   const identifier = document.getElementById("identifier").value.trim();
   const password = document.getElementById("password").value.trim();
   const errorMsg = document.getElementById("errorMsg");
@@ -29,20 +37,29 @@ async function login() {
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include", // Send session cookies
       body: JSON.stringify({ identifier, password }),
     });
 
     const data = await res.json();
 
-    if (res.ok) {
+    if (res.ok && data.success) {
+      // Optionally store user in localStorage
       localStorage.setItem("user", JSON.stringify(data.user));
+
       alert("Login Successful!");
-      window.location.href = "/explore";
+      window.location.href = "/explore"; // Redirect after login
     } else {
       errorMsg.innerText = data.message || "Login failed!";
     }
   } catch (err) {
-    errorMsg.innerText = "Network error!";
-    console.error(err);
+    errorMsg.innerText = "Network error! Please try again.";
+    console.error("Login error:", err);
   }
 }
+
+// Attach login function to form submit
+document.addEventListener("DOMContentLoaded", () => {
+  const loginForm = document.getElementById("loginForm");
+  if (loginForm) loginForm.addEventListener("submit", login);
+});

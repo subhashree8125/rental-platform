@@ -1,122 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>BROKLINK - Explore Properties</title>
-  <link rel="icon" type="image/png" href="/backend/static/img/logo.png">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
-    body{background:#f0f2f5;color:#333;}
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/explore.css') }}">
+  
 
-    /* Header */
-    header{
-      display:flex;justify-content:space-between;align-items:center;
-      background:#1e2a38;color:#fff;
-      box-shadow:0 3px 8px rgba(0,0,0,0.2);padding:8px 20px;
-    }
-    header h1{color:#ffcb05;font-size:1.6rem;}
-    .header-buttons button{
-      margin-left:15px;padding:8px 16px;border:none;border-radius:20px;
-      font-weight:600;cursor:pointer;transition:.3s;
-    }
-    .post-btn{background:#ffcb05;color:#1e2a38;}
-    .login-btn{background:#fff;color:#1e2a38;}
-    .post-btn:hover,.login-btn:hover{opacity:.85;transform:scale(1.05);}
-
-    /* Layout */
-    .container{display:flex;gap:20px;padding:20px;}
-    aside{
-      width:260px;background:#fff;border-radius:8px;
-      padding:15px;box-shadow:0 4px 10px rgba(0,0,0,.1);height:fit-content;
-    }
-    .accordion{margin-bottom:12px;}
-    .accordion button{
-      width:100%;background:#e9eff5;border:none;outline:none;
-      text-align:left;padding:10px;font-size:15px;font-weight:600;
-      cursor:pointer;border-radius:5px;color:#1e2a38;
-    }
-    .accordion button:after{content:"+";float:right;}
-    .accordion button.active:after{content:"-";}
-    .panel{display:none;padding:10px 0;}
-    .panel label{display:block;font-size:14px;margin:5px 0;}
-
-    /* Filter buttons */
-    .filter-buttons{
-      display:flex;
-      gap:10px;
-      margin-bottom:15px;
-    }
-    .filter-buttons button{
-      flex:1;
-      padding:8px;
-      border:none;
-      border-radius:6px;
-      font-weight:600;
-      cursor:pointer;
-      transition:.3s;
-    }
-    .apply-btn{background:#ffcb05;color:#1e2a38;}
-    .clear-btn{background:#e0e0e0;color:#1e2a38;}
-    .apply-btn:hover,.clear-btn:hover{opacity:.85;}
-
-    /* Gallery */
-    .gallery{
-      flex:1;
-      display:grid;
-      grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
-      gap:20px;
-      min-height:600px;
-      padding:20px;
-      box-sizing:border-box;
-      align-content:start;
-    }
-    .property-card{
-      background:#fff;border-radius:10px;overflow:hidden;
-      box-shadow:0 4px 10px rgba(0,0,0,.1);cursor:pointer;
-      transition:.3s;border:1px solid #e0e0e0;
-    }
-    .property-card:hover{transform:translateY(-6px);box-shadow:0 6px 18px rgba(0,0,0,.2);}
-    .property-card img{width:100%;height:180px;object-fit:cover;transition:.3s;}
-    .property-card:hover img{transform:scale(1.05);}
-    .property-info{padding:14px;}
-    .property-info h4{margin-bottom:6px;font-size:16px;color:#1e2a38;}
-    .property-info p{font-size:14px;color:#555;margin:2px 0;}
-    .property-info p strong{color:#ff512f;}
-
-    .logo img {height: 100px;width: 120px;}
-
-    /* Modal */
-    .modal{
-      display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-      background:rgba(0,0,0,.7);justify-content:center;align-items:center;z-index:1000;
-    }
-    .modal-content{
-      background:#fff;border-radius:10px;max-width:600px;width:90%;
-      padding:20px;position:relative;animation:fadeIn .3s;
-      box-shadow:0 6px 20px rgba(0,0,0,0.3);
-    }
-    .modal-content img{width:100%;height:300px;object-fit:cover;border-radius:8px;margin-bottom:15px;}
-    .close-btn{position:absolute;top:10px;right:20px;font-size:24px;font-weight:bold;cursor:pointer;color:#1e2a38;}
-    @keyframes fadeIn{from{opacity:0;transform:scale(.9);}to{opacity:1;transform:scale(1);}}
-
-    @media(max-width:768px){.container{flex-direction:column;}aside{width:100%;}}
-  </style>
 </head>
 <body>
 
   <!-- Header -->
   <header>
     <div class="logo">
-    <a href="/">
-      <link rel="icon" type="image/png" href="/static/img/logo.png">
-      <img src="/static/img/logo.png" alt="BROKLINK LOGO">
-    </a>
-  </div>
+      <a href="/"><img src="/static/img/logo.png" alt="BROKLINK LOGO"></a>
+    </div>
     <div class="header-buttons">
       <button class="post-btn" onclick="location.href='postproperty'">Post Property</button>
-      <button class="login-btn" onclick="location.href='login'">Login</button>
+      <button class="login-btn" onclick="location.href='login'" id="loginBtn">Login</button>
+      <button class="login-btn" style="display:none;" id="profileBtn" onclick="location.href='profile'">👤 Profile</button>
     </div>
   </header>
 
@@ -124,23 +28,15 @@
   <div class="container">
     <!-- Sidebar Filters -->
     <aside>
-      <!-- Filter Buttons -->
       <div class="filter-buttons">
         <button id="applyFilterBtn" class="apply-btn">Apply Filter</button>
         <button id="clearFilterBtn" class="clear-btn">Clear Filter</button>
       </div>
-
       <!-- District -->
       <div class="accordion">
         <button onclick="toggleAccordion(this)">District</button>
-        <div class="panel">
-          <label><input type="radio" name="district" class="district" value="Coimbatore"> Coimbatore</label>
-          <label><input type="radio" name="district" class="district" value="Bangalore"> Bangalore</label>
-          <label><input type="radio" name="district" class="district" value="Chennai"> Chennai</label>
-          <label><input type="radio" name="district" class="district" value="Hyderabad"> Hyderabad</label>
-        </div>
+        <div class="panel" id="districtPanel"></div>
       </div>
-
       <!-- Areas -->
       <div class="accordion">
         <button onclick="toggleAccordion(this)">Areas</button>
@@ -148,7 +44,6 @@
           <p>Select a district first</p>
         </div>
       </div>
-
       <!-- Property Type -->
       <div class="accordion">
         <button onclick="toggleAccordion(this)">Property Type</button>
@@ -159,60 +54,18 @@
           <label><input type="checkbox" value="Hostel"> Hostel</label>
         </div>
       </div>
-
       <!-- BHK -->
       <div class="accordion">
         <button onclick="toggleAccordion(this)">BHK</button>
-        <div class="panel">
-          <label><input type="radio" name="bhk" value="1"> 1 BHK</label>
-          <label><input type="radio" name="bhk" value="2"> 2 BHK</label>
-          <label><input type="radio" name="bhk" value="3"> 3 BHK</label>
-          <label><input type="radio" name="bhk" value="4 and more"> 4 and more</label>
-        </div>
+        <div class="panel" id="bhkPanel"></div>
       </div>
-
       <!-- Budget -->
       <div class="accordion">
         <button onclick="toggleAccordion(this)">Budget</button>
         <div class="panel">
-          <label>Min: <input type="range" id="minBudget" min="1000" max="90000" step="1000" value="10000"></label>
-          <label>Max: <input type="range" id="maxBudget" min="1000" max="90000" step="1000" value="40000"></label>
-          <p id="budgetRange">₹10000 - ₹40000</p>
-        </div>
-      </div>
-
-      <!-- Car Parking -->
-      <div class="accordion">
-        <button onclick="toggleAccordion(this)">Car Parking</button>
-        <div class="panel">
-          <label><input type="radio" name="parking" value="Any"> Any</label>
-          <label><input type="radio" name="parking" value="Available"> Available</label>
-          <label><input type="radio" name="parking" value="Not Available"> Not Available</label>
-        </div>
-      </div>
-
-      <!-- Pets -->
-      <div class="accordion">
-        <button onclick="toggleAccordion(this)">Pets</button>
-        <div class="panel">
-          <label><input type="radio" name="pets" value="Any"> Any</label>
-          <label><input type="radio" name="pets" value="Allowed"> Allowed</label>
-          <label><input type="radio" name="pets" value="Not Allowed"> Not Allowed</label>
-        </div>
-      </div>
-
-      <!-- Facing -->
-      <div class="accordion">
-        <button onclick="toggleAccordion(this)">Facing</button>
-        <div class="panel">
-          <label><input type="checkbox" value="East"> East</label>
-          <label><input type="checkbox" value="West"> West</label>
-          <label><input type="checkbox" value="North"> North</label>
-          <label><input type="checkbox" value="South"> South</label>
-          <label><input type="checkbox" value="Northeast">Northeast</label>
-          <label><input type="checkbox" value="Northwest">Northwest</label>
-          <label><input type="checkbox" value="Southeast"> Southeast</label>
-          <label><input type="checkbox" value="Southwest"> Southwest</label>
+          <label>Min: <input type="range" id="minBudget" min="0" max="100000" step="100" value="10000"></label>
+          <label>Max: <input type="range" id="maxBudget" min="0" max="100000" step="100" value="40000"></label>
+          <p id="budgetRange"></p>
         </div>
       </div>
     </aside>
@@ -221,181 +74,29 @@
     <main class="gallery" id="propertyGallery"></main>
   </div>
 
-  <!-- Modal -->
+  <!-- Modal with Carousel -->
   <div class="modal" id="propertyModal">
     <div class="modal-content">
       <span class="close-btn" onclick="closeModal()">&times;</span>
-      <img id="modalImg" src="" alt="">
+
+      <div class="carousel">
+        <button class="prev-btn">&#10094;</button>
+        <img id="carouselImage" src="" alt="Property Image">
+        <button class="next-btn">&#10095;</button>
+      </div>
+
       <h2 id="modalTitle"></h2>
       <p><b>Type:</b> <span id="modalType"></span></p>
       <p><b>BHK:</b> <span id="modalBHK"></span></p>
       <p><b>Price:</b> ₹<span id="modalPrice"></span>/month</p>
-      <p><b>Parking:</b> <span id="modalParking"></span></p>
-      <p><b>Pets:</b> <span id="modalPets"></span></p>
-      <p><b>Facing:</b> <span id="modalFacing"></span></p>
+      <p><b>District:</b> <span id="modalDistrict"></span></p>
+      <p><b>Address:</b> <span id="modalAddress"></span></p>
+      <button id="contactBtn" class="contact-btn">📞 Contact Owner</button>
+      <p><b>Description:</b></p>
       <p id="modalDesc"></p>
     </div>
   </div>
 
-  <script>
-    const areasByCity = {
-      "Coimbatore": ["Gandhipuram","RS Puram","Peelamedu"],
-      "Bangalore": ["Whitefield","Indiranagar","Koramangala"],
-      "Chennai": ["Velachery","T Nagar","Anna Nagar"],
-      "Hyderabad": ["Banjara Hills","Gachibowli","Secunderabad"]
-    };
-
-    // Update Areas when District changes
-    function updateAreas(){
-      const checkedDistrict=document.querySelector("input[name='district']:checked");
-      const panel=document.getElementById("areasPanel");
-      panel.innerHTML="";
-      if(!checkedDistrict){
-        panel.innerHTML="<p>Select a district first</p>";
-        return;
-      }
-      let d=checkedDistrict.value;
-      if(areasByCity[d]){
-        const cityTitle=document.createElement("h4");
-        cityTitle.innerText=d;
-        panel.appendChild(cityTitle);
-        areasByCity[d].forEach(a=>{
-          const lbl=document.createElement("label");
-          lbl.innerHTML = `<input type="checkbox" value="${a}" class="area"> ${a}`;
-          panel.appendChild(lbl);
-        });
-      }
-    }
-    document.querySelectorAll("input[name='district']").forEach(rb=>{
-      rb.addEventListener("change",updateAreas);
-    });
-
-    // Budget slider
-    const minBudget=document.getElementById("minBudget");
-    const maxBudget=document.getElementById("maxBudget");
-    const budgetRange=document.getElementById("budgetRange");
-
-    function updateBudget(){
-      let min=parseInt(minBudget.value);
-      let max=parseInt(maxBudget.value);
-      if(min>max){[min,max]=[max,min];}
-      budgetRange.innerText=`₹${min} - ₹${max}`;
-    }
-    minBudget.oninput=updateBudget;
-    maxBudget.oninput=updateBudget;
-    updateBudget();
-
-    // Sample property data
-    const properties=[
-      {id:1,title:"2BHK in Coimbatore",type:"Flat",bhk:"2",price:25000,parking:"Available",pets:"Allowed",facing:"East",district:"Coimbatore",area:"Gandhipuram",img:"https://picsum.photos/400/250?random=11",desc:"Spacious flat in Gandhipuram."},
-      {id:2,title:"3BHK House in Coimbatore",type:"House",bhk:"3",price:40000,parking:"Available",pets:"Not Allowed",facing:"West",district:"Coimbatore",area:"RS Puram",img:"https://picsum.photos/400/250?random=12",desc:"Independent house with garden."},
-      {id:3,title:"1BHK PG in Hyderabad",type:"PG",bhk:"1",price:8000,parking:"Not Available",pets:"Not Allowed",facing:"North",district:"Hyderabad",area:"Secunderabad",img:"https://picsum.photos/400/250?random=13",desc:"Affordable PG for students."},
-      {id:4,title:"2BHK Hostel Room",type:"Hostel",bhk:"2",price:12000,parking:"Not Available",pets:"Allowed",facing:"South",district:"Bangalore",area:"Whitefield",img:"https://picsum.photos/400/250?random=14",desc:"Comfortable hostel with mess facility."},
-      {id:5,title:"4BHK Villa in Bangalore",type:"House",bhk:"4",price:85000,parking:"Available",pets:"Allowed",facing:"East",district:"Bangalore",area:"Koramangala",img:"https://picsum.photos/400/250?random=15",desc:"Luxury villa with private parking."},
-      {id:6,title:"2BHK Flat in Chennai",type:"Flat",bhk:"2",price:20000,parking:"Available",pets:"Allowed",facing:"West",district:"Chennai",area:"T Nagar",img:"https://picsum.photos/400/250?random=16",desc:"Modern apartment near IT hub."}
-    ];
-
-    const gallery=document.getElementById("propertyGallery");
-    const modal=document.getElementById("propertyModal");
-
-    function renderProperties(list){
-      gallery.innerHTML="";
-      if(list.length===0){
-        gallery.innerHTML="<p style='grid-column:1/-1;text-align:center;font-size:18px;color:#555;'>No properties found.</p>";
-        return;
-      }
-      list.forEach(p=>{
-        const card=document.createElement("div");
-        card.className="property-card";
-        card.innerHTML=`
-          <img src="${p.img}" alt="">
-          <div class="property-info">
-            <h4>${p.title}</h4>
-            <p><strong>₹${p.price}</strong>/month</p>
-            <p>${p.type}, ${p.bhk} BHK</p>
-            <p>Parking: ${p.parking} | Pets: ${p.pets}</p>
-          </div>`;
-        card.onclick=()=>openModal(p);
-        gallery.appendChild(card);
-      });
-    }
-
-    function openModal(p){
-      document.getElementById("modalImg").src=p.img;
-      document.getElementById("modalTitle").innerText=p.title;
-      document.getElementById("modalType").innerText=p.type;
-      document.getElementById("modalBHK").innerText=p.bhk;
-      document.getElementById("modalPrice").innerText=p.price;
-      document.getElementById("modalParking").innerText=p.parking;
-      document.getElementById("modalPets").innerText=p.pets;
-      document.getElementById("modalFacing").innerText=p.facing;
-      document.getElementById("modalDesc").innerText=p.desc;
-      modal.style.display="flex";
-    }
-
-    function closeModal(){modal.style.display="none";}
-    function toggleAccordion(btn){
-      btn.classList.toggle("active");
-      const panel=btn.nextElementSibling;
-      panel.style.display=panel.style.display==="block"?"none":"block";
-    }
-
-    // Apply filters
-    document.getElementById("applyFilterBtn").addEventListener("click",()=>{
-      let filtered=properties.slice();
-
-      // District
-      const district=document.querySelector("input[name='district']:checked")?.value;
-      if(district) filtered=filtered.filter(p=>p.district===district);
-
-      // Areas
-      const areaEls=document.querySelectorAll(".area:checked");
-      if(areaEls.length>0){
-        const areas=[...areaEls].map(a=>a.value);
-        filtered=filtered.filter(p=>areas.includes(p.area));
-      }
-
-      // Property Type
-      const typeEls=document.querySelectorAll("aside .panel input[type='checkbox']:checked");
-      const types=[...typeEls].map(a=>a.value).filter(v=>v!=="Any");
-      if(types.length>0) filtered=filtered.filter(p=>types.includes(p.type));
-
-      // BHK
-      const bhk=document.querySelector("input[name='bhk']:checked")?.value;
-      if(bhk) filtered=filtered.filter(p=>p.bhk===bhk || (bhk==="4 and more" && parseInt(p.bhk)>=4));
-
-      // Budget
-      let min=parseInt(minBudget.value), max=parseInt(maxBudget.value);
-      if(min>max) [min,max]=[max,min];
-      filtered=filtered.filter(p=>p.price>=min && p.price<=max);
-
-      // Parking
-      const parking=document.querySelector("input[name='parking']:checked")?.value;
-      if(parking && parking!=="Any") filtered=filtered.filter(p=>p.parking===parking);
-
-      // Pets
-      const pets=document.querySelector("input[name='pets']:checked")?.value;
-      if(pets && pets!=="Any") filtered=filtered.filter(p=>p.pets===pets);
-
-      // Facing
-      const facingEls=document.querySelectorAll("aside .panel input[type='checkbox']:checked");
-      const facings=[...facingEls].map(f=>f.value).filter(v=>["East","West","North","South","Northeast","Northwest","Southeast","Southwest"].includes(v));
-      if(facings.length>0) filtered=filtered.filter(p=>facings.includes(p.facing));
-
-      renderProperties(filtered);
-    });
-
-    // Clear filters
-    document.getElementById("clearFilterBtn").addEventListener("click",()=>{
-      document.querySelectorAll("aside input").forEach(i=>i.checked=false);
-      minBudget.value=10000;
-      maxBudget.value=40000;
-      updateBudget();
-      updateAreas();
-      renderProperties(properties);
-    });
-
-    renderProperties(properties);
-  </script>
+  <script src="{{ url_for('static', filename='js/explore.js') }}"></script>
 </body>
 </html>

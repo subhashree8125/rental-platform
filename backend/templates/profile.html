@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - BROKLINK{% endblock %}
+
+{% block content %}
+  <h2>My Profile</h2>
+  <p><strong>Name:</strong> {{ user.full_name }}</p>
+  <p><strong>Email:</strong> {{ user.email }}</p>
+  <p><strong>Mobile:</strong> {{ user.mobile_number or "Not Provided" }}</p>
+
+  <div>
+    <button onclick="window.location.href='/update_profile'">Update Profile</button>
+    <button onclick="deleteProfile()">Delete Profile</button>
+  </div>
+
+  <script>
+    async function deleteProfile() {
+      if (!confirm("Are you sure you want to delete your account?")) return;
+      try {
+        const res = await fetch("/api/profile", { method: "DELETE" });
+        const data = await res.json();
+        if (data.success) {
+          alert("Your account has been deleted.");
+          window.location.href = "/";
+        } else {
+          alert(data.error || "Something went wrong.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Network error!");
+      }
+    }
+  </script>
+{% endblock %}
