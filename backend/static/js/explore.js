@@ -4,17 +4,29 @@ let currentImageIndex = 0;
 let selectedProperty = null;
 
 // ---------------------
-// Fetch properties
+// Fetch properties (with optional filters)
 // ---------------------
-async function fetchProperties() {
+async function fetchProperties(filters = {}) {
   try {
-    const res = await fetch("/api/properties");
+    const query = Object.keys(filters).length
+      ? `?filters=${encodeURIComponent(JSON.stringify(filters))}`
+      : "";
+
+    const res = await fetch(`/api/properties${query}`);
     const data = await res.json();
     properties = Array.isArray(data) ? data : [];
     renderProperties(properties);
-    fillDistricts(properties);
-    fillBHK(properties);
-    initAreasPanel(); // show "Select a district first"
+
+    // Only refill filter panels when no filters are applied (initial load)
+    if (Object.keys(filters).length === 0) {
+      fillDistricts(properties);
+      fillBHK(properties);
+      initAreasPanel();
+      fillCarParking();
+      fillPets();
+      fillFacing();
+      fillFurnishing();
+    }
   } catch (err) {
     console.error("Failed to load properties:", err);
   }
@@ -169,33 +181,98 @@ function fillBHK(list) {
   });
 }
 
-// Apply filters
+// ---------------------
+// New Filter Panels
+// ---------------------
+function fillCarParking() {
+  const panel = document.getElementById("carParkingPanel");
+  panel.innerHTML = `
+    <label><input type="radio" name="car_parking" value=""> Any</label>
+    <label><input type="radio" name="car_parking" value="Available"> Available</label>
+    <label><input type="radio" name="car_parking" value="NotAvailable"> Not Available</label>
+  `;
+}
+
+function fillPets() {
+  const panel = document.getElementById("petsPanel");
+  panel.innerHTML = `
+    <label><input type="radio" name="pets" value=""> Any</label>
+    <label><input type="radio" name="pets" value="Allowed"> Allowed</label>
+    <label><input type="radio" name="pets" value="Strictly Not Allowed"> Strictly Not Allowed</label>
+  `;
+}
+
+function fillFacing() {
+  const panel = document.getElementById("facingPanel");
+  const options = ["East", "West", "North", "South", "Southeast", "Northeast", "Southwest", "Northwest"];
+  panel.innerHTML = options.map((o) => `<label><input type="checkbox" value="${o}"> ${o}</label>`).join("");
+}
+
+function fillFurnishing() {
+  const panel = document.getElementById("furnishingPanel");
+  const options = ["Furnished", "Semi-furnished", "Unfurnished"];
+  panel.innerHTML = options.map((o) => `<label><input type="checkbox" value="${o}"> ${o}</label>`).join("");
+}
+
+// ---------------------
+// Apply filter button
+// ---------------------
 document.getElementById("applyFilterBtn").addEventListener("click", () => {
-  const selectedDistrict = document.querySelector("#districtPanel input[name='district']:checked")?.value || null;
-  const selectedAreas = [...document.querySelectorAll("#areasPanel input:checked")].map((i) => i.value);
-  const selectedTypes = [...document.querySelectorAll("div.panel input[type='checkbox']:checked")]
-    .map((i) => i.value)
-    .filter((v) => !selectedAreas.includes(v) && !["1HK", "1BHK", "2BHK", "3BHK", "4+ BHK"].includes(v)); // exclude BHK/areas
-  const selectedBHK = [...document.querySelectorAll("#bhkPanel input:checked")].map((i) => i.value);
-  const min = parseInt(document.getElementById("minBudget").value);
-  const max = parseInt(document.getElementById("maxBudget").value);
+  const selectedDistricts = Array.from(document.querySelectorAll("#districtPanel input:checked")).map(el => el.value);
+  const selectedAreas = Array.from(document.querySelectorAll("#areasPanel input:checked")).map(el => el.value);
+  const selectedPropertyTypes = Array.from(document.querySelectorAll("input[value=House]:checked, input[value=Flat]:checked, input[value=PG]:checked, input[value=Hostel]:checked")).map(el => el.value);
+  const selectedBHK = Array.from(document.querySelectorAll("#bhkPanel input:checked")).map(el => el.value);
 
-  let filtered = properties.filter((p) => {
-    return (!selectedDistrict || p.district === selectedDistrict) &&
-      (!selectedAreas.length || selectedAreas.includes(p.address)) &&
-      (!selectedTypes.length || selectedTypes.includes(p.property_type)) &&
-      (!selectedBHK.length || selectedBHK.includes(p.house_type)) &&
-      (parseInt(p.rent_price) >= min && parseInt(p.rent_price) <= max);
-  });
-  renderProperties(filtered);
+  const minBudget = document.getElementById("minBudget").value;
+  const maxBudget = document.getElementById("maxBudget").value;
+
+  // New filters
+  const carParking = document.querySelector("input[name='car_parking']:checked")?.value || "";
+  const pets = document.querySelector("input[name='pets']:checked")?.value || "";
+  const facing = Array.from(document.querySelectorAll("#facingPanel input:checked")).map(el => el.value);
+  const furnishing = Array.from(document.querySelectorAll("#furnishingPanel input:checked")).map(el => el.value);
+
+  const filters = {
+    districts: selectedDistricts,
+    areas: selectedAreas,
+    propertyTypes: selectedPropertyTypes,
+    bhk: selectedBHK,
+    minBudget,
+    maxBudget,
+    carParking,
+    pets,
+    facing,
+    furnishing
+  };
+
+  fetchProperties(filters);
 });
 
+// ---------------------
 // Clear filters
+// ---------------------
 document.getElementById("clearFilterBtn").addEventListener("click", () => {
-  renderProperties(properties);
-  document.querySelectorAll("aside input[type='checkbox'], aside input[type='radio']").forEach((cb) => (cb.checked = false));
+  // Reset all checkboxes and radio buttons
+  document.querySelectorAll("aside input[type='checkbox'], aside input[type='radio']").forEach(cb => cb.checked = false);
+  
+  // Reset budget sliders
+  const minBudget = document.getElementById("minBudget");
+  const maxBudget = document.getElementById("maxBudget");
+  minBudget.value = minBudget.min;
+  maxBudget.value = maxBudget.max;
+  updateBudgetLabel(); // update the display
+
+  // Reset select/radio panels for Car Parking / Pets / Facing / Furnishing
+  document.querySelectorAll("#carParkingPanel input, #petsPanel input").forEach(cb => cb.checked = false);
+  document.querySelectorAll("#facingPanel input, #furnishingPanel input").forEach(cb => cb.checked = false);
+
+  // Reset Areas panel
   initAreasPanel();
+
+  // Render all properties
+  renderProperties(properties);
 });
+
 
 // ---------------------
 // Budget live label

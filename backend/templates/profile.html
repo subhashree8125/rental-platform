@@ -1,34 +1,136 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
+  <title>Profile - BROKLINK</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+</head>
+<body>
 
-{% block title %}Profile - BROKLINK{% endblock %}
+  <!-- =======================
+       Header
+  ======================== -->
+  <header>
+    <div class="logo">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="BROKLINK Logo">
+    </div>
+    <div class="header-buttons">
+  <a href="{{ url_for('index') }}">Home</a>
+  <button onclick="logout()">Logout</button>
+</div>
 
-{% block content %}
-  <h2>My Profile</h2>
-  <p><strong>Name:</strong> {{ user.full_name }}</p>
-  <p><strong>Email:</strong> {{ user.email }}</p>
-  <p><strong>Mobile:</strong> {{ user.mobile_number or "Not Provided" }}</p>
+  </header>
 
-  <div>
-    <button onclick="window.location.href='/update_profile'">Update Profile</button>
-    <button onclick="deleteProfile()">Delete Profile</button>
+  <!-- =======================
+       Main Container
+  ======================== -->
+  <div class="container">
+
+    <!-- Profile Section -->
+    <div class="profile-section">
+      <h2>My Profile</h2>
+      <div class="profile-info">
+        <div class="field"><strong>Name:</strong> <span id="profileName">{{ user.full_name }}</span></div>
+        <div class="field"><strong>Email:</strong> <span id="profileEmail">{{ user.email }}</span></div>
+        <div class="field"><strong>Mobile:</strong> <span id="profileMobile">{{ user.mobile_number or "Not Provided" }}</span></div>
+      </div>
+
+      <div class="profile-actions">
+        <button id="editProfileBtn" onclick="openModal()">Update Profile</button>
+        <button id="deleteProfileBtn" onclick="deleteProfile()">Delete Profile</button>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    &copy; 2025 BROKLINK
+  </footer>
+
+  <!-- =======================
+       Edit Profile Modal
+  ======================== -->
+  <div id="editProfileModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal()">&times;</span>
+      <h3>Edit Profile</h3>
+      <form id="editProfileForm">
+        <input type="text" id="editName" placeholder="Full Name">
+        <input type="text" id="editMobile" placeholder="Mobile Number">
+        <input type="password" id="editPassword" placeholder="New Password (leave blank if no change)">
+        <button type="submit">Save Changes</button>
+      </form>
+    </div>
   </div>
 
   <script>
-    async function deleteProfile() {
-      if (!confirm("Are you sure you want to delete your account?")) return;
-      try {
-        const res = await fetch("/api/profile", { method: "DELETE" });
-        const data = await res.json();
-        if (data.success) {
-          alert("Your account has been deleted.");
-          window.location.href = "/";
-        } else {
-          alert(data.error || "Something went wrong.");
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Network error!");
+    function openModal() {
+      document.getElementById('editProfileModal').style.display = 'flex';
+      // Pre-fill current info
+      document.getElementById('editName').value = document.getElementById('profileName').textContent;
+      document.getElementById('editMobile').value = document.getElementById('profileMobile').textContent;
+    }
+
+    function closeModal() {
+      document.getElementById('editProfileModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside content
+    window.onclick = function(event) {
+      const modal = document.getElementById('editProfileModal');
+      if (event.target == modal) {
+        closeModal();
       }
     }
+
+    // Handle form submission
+    document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = {
+        full_name: document.getElementById('editName').value,
+        mobile_number: document.getElementById('editMobile').value,
+        password: document.getElementById('editPassword').value
+      };
+
+      const res = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+      if(result.success) {
+        alert(result.message);
+        // Update page values
+        document.getElementById('profileName').textContent = data.full_name;
+        document.getElementById('profileMobile').textContent = data.mobile_number || "Not Provided";
+        closeModal();
+      } else {
+        alert(result.error || "Failed to update profile");
+      }
+    });
+
+    // Delete Profile
+    async function deleteProfile() {
+      if(!confirm("Are you sure you want to delete your account?")) return;
+      const res = await fetch('/api/profile', { method: 'DELETE' });
+      const result = await res.json();
+      if(result.success) {
+        alert(result.message);
+        window.location.href = '/';
+      } else {
+        alert(result.error || "Failed to delete account");
+      }
+    }
+
+    // Logout
+    async function logout() {
+      await fetch('/logout');
+      window.location.href = '/';
+    }
   </script>
-{% endblock %}
+
+</body>
+</html>

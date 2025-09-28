@@ -1,14 +1,29 @@
-document.addEventListener("DOMContentLoaded", () => {
-    // Load user from localStorage
-    let user = JSON.parse(localStorage.getItem("user")) || {};
+document.addEventListener("DOMContentLoaded", async () => {
+    let user = {}; // Will store fetched user info
 
     const profileName = document.getElementById("profileName");
     const profileEmail = document.getElementById("profileEmail");
     const profilePhone = document.getElementById("profilePhone");
 
-    profileName.innerText = user.full_name || "N/A";
-    profileEmail.innerText = user.email || "N/A";
-    profilePhone.innerText = user.mobile_number || "N/A";
+    // Fetch user info from backend
+    async function fetchUserProfile() {
+        try {
+            const res = await fetch("/api/profile");
+            if (!res.ok) throw new Error("Failed to fetch profile");
+            user = await res.json();
+
+            profileName.innerText = user.full_name || "N/A";
+            profileEmail.innerText = user.email || "N/A";
+            profilePhone.innerText = user.mobile_number || "Not Provided";
+        } catch (err) {
+            console.error(err);
+            profileName.innerText = "N/A";
+            profileEmail.innerText = "N/A";
+            profilePhone.innerText = "Not Provided";
+        }
+    }
+
+    await fetchUserProfile();
 
     // Edit profile modal
     const editBtn = document.getElementById("editProfileBtn");
@@ -34,20 +49,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const updatedPhone = editPhone.value.trim();
 
         try {
-            const res = await fetch("/api/user/update", {
-                method: "POST",
+            const res = await fetch("/api/profile", {
+                method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ full_name: updatedName, mobile_number: updatedPhone })
             });
             const data = await res.json();
             if (data.success) {
                 alert("Profile updated successfully!");
-                user.full_name = updatedName;
-                user.mobile_number = updatedPhone;
-                localStorage.setItem("user", JSON.stringify(user));
-
-                profileName.innerText = user.full_name || "N/A";
-                profilePhone.innerText = user.mobile_number || "N/A";
+                await fetchUserProfile(); // Refresh user info
                 editModal.style.display = "none";
             } else {
                 alert("Error: " + data.message);
@@ -59,8 +69,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Load user's properties
-    const propertiesContainer = document.getElementById("userProperties");
-    async function fetchUserProperties() {
+    window.fetchUserProperties = async function() {
+        const propertiesContainer = document.getElementById("userProperties");
         try {
             const res = await fetch("/api/user/properties");
             const data = await res.json();
@@ -76,6 +86,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     <h4>${p.property_type} - ${p.house_type}</h4>
                     <p>₹${parseInt(p.rent_price).toLocaleString()}</p>
                     <p>${p.address}, ${p.district}</p>
+                    <p>Status: <span id="status-${p.property_id}">${p.status}</span></p>
+                    <button onclick="toggleStatus(${p.property_id})">Toggle Status</button>
                 `;
                 propertiesContainer.appendChild(card);
             });
@@ -83,27 +95,32 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error(err);
             propertiesContainer.innerHTML = "<p>Error loading properties.</p>";
         }
-    }
+    };
 
-    fetchUserProperties();
+    await fetchUserProperties();
 });
-function toggleStatus(id) {
-  const currentStatus = document.getElementById(`status-${id}`).innerText;
-  const newStatus = currentStatus === "Available" ? "Unavailable" : "Available";
 
-  fetch(`/api/properties/${id}/status`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status: newStatus })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      document.getElementById(`status-${id}`).innerText = newStatus;
-      alert(`Property marked as ${newStatus}`);
-      fetchUserProperties(); // refresh profile property list
-      fetchProperties();     // refresh explore page
+// Make toggleStatus globally accessible
+async function toggleStatus(id) {
+    const currentStatus = document.getElementById(`status-${id}`).innerText;
+    const newStatus = currentStatus === "Available" ? "Unavailable" : "Available";
+
+    try {
+        const res = await fetch(`/api/properties/${id}/status`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: newStatus })
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert(`Property marked as ${newStatus}`);
+            window.fetchUserProperties(); // refresh profile property list
+            if (typeof fetchProperties === "function") fetchProperties(); // refresh explore page if exists
+        } else {
+            alert("Failed to update status");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Something went wrong!");
     }
-  });
 }
-

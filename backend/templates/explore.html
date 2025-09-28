@@ -63,11 +63,58 @@
       <div class="accordion">
         <button onclick="toggleAccordion(this)">Budget</button>
         <div class="panel">
-          <label>Min: <input type="range" id="minBudget" min="0" max="100000" step="100" value="10000"></label>
+          <label>Min: <input type="range" id="minBudget" min="0" max="100000" step="100" value="1000"></label>
           <label>Max: <input type="range" id="maxBudget" min="0" max="100000" step="100" value="40000"></label>
           <p id="budgetRange"></p>
         </div>
       </div>
+                  <!-- Car Parking -->
+      <div class="accordion">
+        <button onclick="toggleAccordion(this)">Car Parking</button>
+        <div class="panel" id="carParkingPanel">
+          <label><input type="radio" name="car_parking" value=""> Any</label>
+          <label><input type="radio" name="car_parking" value="Available"> Available</label>
+          <label><input type="radio" name="car_parking" value="NotAvailable"> Not Available</label>
+        </div>
+      </div>
+
+      <!-- Pets -->
+      <div class="accordion">
+        <button onclick="toggleAccordion(this)">Pets</button>
+        <div class="panel" id="petsPanel">
+          <label><input type="radio" name="pets" value=""> Any</label>
+          <label><input type="radio" name="pets" value="Allowed"> Allowed</label>
+          <label><input type="radio" name="pets" value="Strictly Not Allowed"> Not Allowed</label>
+        </div>
+      </div>
+
+      <!-- Facing -->
+      <div class="accordion">
+        <button onclick="toggleAccordion(this)">Facing</button>
+        <div class="panel" id="facingPanel">
+          <label><input type="checkbox" value="East"> East</label>
+          <label><input type="checkbox" value="West"> West</label>
+          <label><input type="checkbox" value="North"> North</label>
+          <label><input type="checkbox" value="South"> South</label>
+          <label><input type="checkbox" value="Southeast"> Southeast</label>
+          <label><input type="checkbox" value="Northeast"> Northeast</label>
+          <label><input type="checkbox" value="Southwest"> Southwest</label>
+          <label><input type="checkbox" value="Northwest"> Northwest</label>
+        </div>
+      </div>
+
+      <!-- Furnishing -->
+      <div class="accordion">
+        <button onclick="toggleAccordion(this)">Furnishing</button>
+        <div class="panel" id="furnishingPanel">
+          <label><input type="checkbox" value="Furnished"> Furnished</label>
+          <label><input type="checkbox" value="Semi-furnished"> Semi-Furnished</label>
+          <label><input type="checkbox" value="Unfurnished"> Unfurnished</label>
+        </div>
+      </div>
+
+
+
     </aside>
 
     <!-- Property Gallery -->
