@@ -3,7 +3,7 @@ from flask import Flask, render_template, redirect, url_for, request, session, f
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash
-
+import json
 from backend.db import db
 from backend.config import Config
 
@@ -21,7 +21,59 @@ property_routes = Blueprint("property_routes", __name__)
 # ------------------------
 @property_routes.route("/api/properties", methods=["GET"])
 def get_properties():
-    all_props = Property.query.filter_by(status="Available").order_by(Property.property_id.desc()).all()
+    query = Property.query.filter_by(status="Available")
+
+    # Parse filters from query string
+    filters_param = request.args.get("filters")
+    if filters_param:
+        try:
+            filters = json.loads(filters_param)
+
+            # Districts
+            if filters.get("districts"):
+                query = query.filter(Property.district.in_(filters["districts"]))
+
+            # Areas (we assume 'address' stores area info)
+            if filters.get("areas"):
+                query = query.filter(Property.address.in_(filters["areas"]))
+
+            # Property Types
+            if filters.get("propertyTypes"):
+                query = query.filter(Property.property_type.in_(filters["propertyTypes"]))
+
+            # BHK
+            if filters.get("bhk"):
+                query = query.filter(Property.house_type.in_(filters["bhk"]))
+
+            # Budget
+            if filters.get("minBudget") and filters.get("maxBudget"):
+                query = query.filter(
+                    Property.rent_price.between(filters["minBudget"], filters["maxBudget"])
+                )
+
+            # Car Parking
+            if filters.get("carParking"):
+                query = query.filter(Property.car_parking == filters["carParking"])
+
+            # Pets
+            if filters.get("pets"):
+                query = query.filter(Property.pets == filters["pets"])
+
+            # Facing (multiple allowed)
+            if filters.get("facing"):
+                query = query.filter(Property.facing.in_(filters["facing"]))
+
+            # Furnishing (multiple allowed)
+            if filters.get("furnishing"):
+                query = query.filter(Property.furnishing.in_(filters["furnishing"]))
+
+        except Exception as e:
+            print("Filter parsing error:", e)
+
+    # Final query
+    all_props = query.order_by(Property.property_id.desc()).all()
+
+    # Convert to dict list
     props_list = [{
         "property_id": p.property_id,
         "full_name": p.full_name,
@@ -38,6 +90,7 @@ def get_properties():
         "images": p.images.split(",") if p.images else [],
         "status": p.status
     } for p in all_props]
+
     return jsonify(props_list)
 
 
