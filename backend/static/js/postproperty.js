@@ -17,7 +17,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   const user = await checkSession();
   if (!user) {
     alert("Please login first to post a property.");
-    window.location.href = "login";
+    window.location.href = "/login";
   }
 });
 
@@ -26,7 +26,27 @@ document.getElementById("upload")?.addEventListener("change", function () {
   const fileLabel = document.getElementById("file-name");
   if (fileLabel) {
     const files = Array.from(this.files).map(f => f.name).join(", ");
-    fileLabel.textContent = files || "Upload Images";
+    fileLabel.textContent = files || "Browse Images";
+  }
+
+  // Image preview
+  const previewContainer = document.getElementById("preview-container");
+  if (previewContainer) {
+    previewContainer.innerHTML = "";
+    Array.from(this.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        img.style.width = "100px";
+        img.style.height = "100px";
+        img.style.objectFit = "cover";
+        img.style.borderRadius = "6px";
+        img.style.boxShadow = "0 2px 6px rgba(0,0,0,0.3)";
+        previewContainer.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
   }
 });
 
@@ -62,14 +82,13 @@ async function postProperty(event) {
   const user = await checkSession();
   if (!user) {
     alert("Please login before posting a property.");
-    window.location.href = "login";
+    window.location.href = "/login";
     return;
   }
 
   const form = document.getElementById("postPropertyForm");
   const formData = new FormData(form);
 
-  // Message box
   let msgBox = document.getElementById("property-message");
   if (!msgBox) {
     msgBox = document.createElement("div");
@@ -85,7 +104,7 @@ async function postProperty(event) {
 
   try {
     const response = await fetch("/api/properties", { method: "POST", body: formData });
-    
+
     let data;
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.includes("application/json")) {
@@ -102,7 +121,8 @@ async function postProperty(event) {
       msgBox.style.border = "1px solid #c3e6cb";
 
       form.reset();
-      document.getElementById("file-name").textContent = "Upload Images";
+      const fileLabel = document.getElementById("file-name");
+      if (fileLabel) fileLabel.textContent = "Browse Images";
 
       if (data.properties) renderExploreProperties(data.properties);
     } else {
@@ -121,8 +141,8 @@ async function postProperty(event) {
   }
 }
 
-// --- Attach form submit event ---
 document.getElementById("postPropertyForm").addEventListener("submit", postProperty);
+
 // --- Initial load of properties ---
 window.addEventListener("DOMContentLoaded", async () => {
   try {
@@ -134,6 +154,4 @@ window.addEventListener("DOMContentLoaded", async () => {
   } catch (err) {
     console.error("Failed to load properties:", err);
   }
-}       );
-
-// --- END ---
+});
