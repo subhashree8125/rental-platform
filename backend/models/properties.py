@@ -12,6 +12,8 @@ class Property(db.Model):
     full_name = db.Column(db.String(100), nullable=False)
     mobile_number = db.Column(db.String(15), nullable=False)
     address = db.Column(db.Text, nullable=False)
+    city = db.Column(db.String(100), nullable=False)
+    area = db.Column(db.String(100), nullable=False)
     district = db.Column(db.String(100), nullable=False)
     property_type = db.Column(db.String(50), nullable=False)
     house_type = db.Column(db.String(50), nullable=False)

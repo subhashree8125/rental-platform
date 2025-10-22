@@ -1,20 +1,37 @@
 import os
+import json
 from flask import Flask, render_template, redirect, url_for, request, session, flash, jsonify, Blueprint, current_app
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash
-import json
-from backend.db import db
-from backend.config import Config
 
-# Models
-from backend.models.users import Users
-from backend.models.properties import Property
+# Ensure imports work whether run as module (python -m backend.app)
+# or as script inside backend directory (python app.py)
+try:
+    from backend.db import db
+    from backend.config import Config
+    # Models
+    from backend.models.users import Users
+    from backend.models.properties import Property
+    # Blueprints
+    from backend.routes.property_routes import property_routes
+except ModuleNotFoundError:
+    import sys
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.abspath(os.path.join(current_dir, ".."))
+    if project_root not in sys.path:
+        sys.path.insert(0, project_root)
+    from backend.db import db
+    from backend.config import Config
+    # Models
+    from backend.models.users import Users
+    from backend.models.properties import Property
+    # Blueprints
+    from backend.routes.property_routes import property_routes
 
 # ------------------------
 # Blueprints
 # ------------------------
-property_routes = Blueprint("property_routes", __name__)
 
 # ------------------------
 # Property APIs
@@ -29,13 +46,17 @@ def get_properties():
         try:
             filters = json.loads(filters_param)
 
+            # Cities
+            if filters.get("cities"):
+                query = query.filter(Property.city.in_(filters["cities"]))
+
             # Districts
             if filters.get("districts"):
                 query = query.filter(Property.district.in_(filters["districts"]))
 
-            # Areas (we assume 'address' stores area info)
+            # Areas (using the dedicated area column)
             if filters.get("areas"):
-                query = query.filter(Property.address.in_(filters["areas"]))
+                query = query.filter(Property.area.in_(filters["areas"]))
 
             # Property Types
             if filters.get("propertyTypes"):
@@ -78,6 +99,8 @@ def get_properties():
         "property_id": p.property_id,
         "full_name": p.full_name,
         "address": p.address,
+        "city": p.city,
+        "area": p.area,
         "district": p.district,
         "property_type": p.property_type,
         "house_type": p.house_type,
@@ -123,6 +146,8 @@ def create_property():
             full_name=form_data.get("full_name"),
             mobile_number=form_data.get("mobile_number"),
             address=form_data.get("address"),
+            city=form_data.get("city"),
+            area=form_data.get("area"),
             district=form_data.get("district"),
             property_type=form_data.get("property_type"),
             house_type=form_data.get("house_type"),
@@ -144,6 +169,8 @@ def create_property():
             "property_id": p.property_id,
             "full_name": p.full_name,
             "address": p.address,
+            "city": p.city,
+            "area": p.area,
             "district": p.district,
             "property_type": p.property_type,
             "house_type": p.house_type,
@@ -164,27 +191,7 @@ def create_property():
         return jsonify({"error": str(e)}), 500
 
 
-@property_routes.route("/api/properties/<int:property_id>/status", methods=["PATCH"])
-def update_property_status(property_id):
-    user_data = session.get("user")
-    if not user_data:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    prop = Property.query.get(property_id)
-    if not prop:
-        return jsonify({"error": "Property not found"}), 404
-
-    if prop.owner_id != user_data.get("user_id"):
-        return jsonify({"error": "Forbidden"}), 403
-
-    data = request.get_json()
-    new_status = data.get("status")
-    if new_status not in ["Available", "Unavailable"]:
-        return jsonify({"error": "Invalid status"}), 400
-
-    prop.status = new_status
-    db.session.commit()
-    return jsonify({"success": True, "status": prop.status})
+## Status update route is defined in blueprint file to avoid duplication
 
 
 # ------------------------
@@ -217,7 +224,7 @@ def create_app():
     @app.route("/login", methods=["GET", "POST"])
     def login_page():
         return render_template("login.html")
-
+    
     @app.route("/explore")
     def explore_page():
         return render_template("explore.html")
@@ -247,24 +254,33 @@ def create_app():
     # ------------------------
     @app.route("/auth/signup", methods=["POST"])
     def signup_api():
-        data = request.get_json()
-        if not data:
-            return jsonify({"success": False, "message": "No data received"}), 400
+        try:
+            data = request.get_json()
+            if not data:
+                return jsonify({"success": False, "message": "No data received"}), 400
 
-        fullname = data.get("full_name")
-        email = data.get("email")
-        mobile = data.get("mobile_number")
-        password = data.get("password")  # ✅ expect plain password from frontend
+            fullname = data.get("full_name")
+            email = data.get("email")
+            mobile = data.get("mobile_number")
+            password = data.get("password")  # ✅ expect plain password from frontend
 
-        if Users.query.filter_by(email=email).first():
-            return jsonify({"success": False, "message": "Email already exists"}), 400
+            # Validation
+            if not all([fullname, email, mobile, password]):
+                return jsonify({"success": False, "error": "All fields are required"}), 400
 
-        new_user = Users(full_name=fullname, email=email, mobile_number=mobile)
-        new_user.set_password(password)  # ✅ hashes internally
-        db.session.add(new_user)
-        db.session.commit()
+            if Users.query.filter_by(email=email).first():
+                return jsonify({"success": False, "error": "Email already exists"}), 400
 
-        return jsonify({"success": True, "message": "Signup successful"})
+            new_user = Users(full_name=fullname, email=email, mobile_number=mobile)
+            new_user.set_password(password)  # ✅ hashes internally
+            db.session.add(new_user)
+            db.session.commit()
+
+            return jsonify({"success": True, "message": "Signup successful"})
+        except Exception as e:
+            db.session.rollback()
+            print(f"Signup error: {str(e)}")  # Log to console
+            return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
     @app.route("/auth/login", methods=["POST"])
     def login():
@@ -293,7 +309,8 @@ def create_app():
                 session["user"] = {
                     "user_id": user.user_id,
                     "full_name": user.full_name,
-                    "email": user.email
+                    "email": user.email,
+                    "mobile_number": user.mobile_number
                 }
                 return jsonify({"success": True, "user": session["user"]})
 
@@ -319,7 +336,7 @@ def create_app():
             return jsonify({"error": "Unauthorized"}), 401
 
         user_id = session["user"]["user_id"]
-        user = Users.query.get(user_id)
+        user = db.session.get(Users, user_id)
         if not user:
             return jsonify({"error": "User not found"}), 404
 
@@ -337,20 +354,31 @@ def create_app():
 
         data = request.get_json()
         user_id = session["user"]["user_id"]
-        user = Users.query.get(user_id)
+        user = db.session.get(Users, user_id)
         if not user:
             return jsonify({"error": "User not found"}), 404
 
-        if "full_name" in data:
-            user.full_name = data["full_name"]
-        if "mobile_number" in data:
-            user.mobile_number = data["mobile_number"]
-        if "password" in data and data["password"]:
-            user.set_password(data["password"])  # ✅ update with hash
+        # Email uniqueness check
+        if "email" in data and data["email"] != user.email:
+            if Users.query.filter_by(email=data["email"]).first():
+                return jsonify({"error": "Email already exists"}), 400
+
+        # Update user fields
+        user.full_name = data.get("full_name", user.full_name)
+        user.email = data.get("email", user.email)
+        user.mobile_number = data.get("mobile_number", user.mobile_number)
+        if data.get("password"):
+            user.set_password(data["password"])
 
         db.session.commit()
-        session["user"]["full_name"] = user.full_name
-        session["user"]["mobile_number"] = user.mobile_number
+
+        # Update session with new data
+        session["user"] = {
+            "user_id": user.user_id,
+            "full_name": user.full_name,
+            "email": user.email,
+            "mobile_number": user.mobile_number
+        }
 
         return jsonify({"success": True, "message": "Profile updated successfully"})
 
@@ -360,7 +388,7 @@ def create_app():
             return jsonify({"error": "Unauthorized"}), 401
 
         user_id = session["user"]["user_id"]
-        user = Users.query.get(user_id)
+        user = db.session.get(Users, user_id)
         if not user:
             return jsonify({"error": "User not found"}), 404
 
@@ -373,11 +401,16 @@ def create_app():
     # ------------------------
     # Register Blueprint
     # ------------------------
+
+    print("[DEBUG] Registering property_routes blueprint")
     app.register_blueprint(property_routes)
+    print("[DEBUG] property_routes blueprint registered successfully")
+
+    # profile_routes blueprint removed; contact owner handled in property routes
 
     return app
 
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(debug=True, host="0.0.0.0", port=4000)
+    app.run(host="0.0.0.0", port=5002, debug=True)

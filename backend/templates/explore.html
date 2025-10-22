@@ -37,6 +37,13 @@
         <button onclick="toggleAccordion(this)">District</button>
         <div class="panel" id="districtPanel"></div>
       </div>
+      <!-- Cities -->
+      <div class="accordion">
+        <button onclick="toggleAccordion(this)">Cities</button>
+        <div class="panel" id="cityPanel">
+          <p>Select a district first</p>
+        </div>
+      </div>
       <!-- Areas -->
       <div class="accordion">
         <button onclick="toggleAccordion(this)">Areas</button>
@@ -136,6 +143,8 @@
       <p><b>Type:</b> <span id="modalType"></span></p>
       <p><b>BHK:</b> <span id="modalBHK"></span></p>
       <p><b>Price:</b> ₹<span id="modalPrice"></span>/month</p>
+      <p><b>City:</b> <span id="modalCity"></span></p>
+      <p><b>Area:</b> <span id="modalArea"></span></p>
       <p><b>District:</b> <span id="modalDistrict"></span></p>
       <p><b>Address:</b> <span id="modalAddress"></span></p>
       <button id="contactBtn" class="contact-btn">📞 Contact Owner</button>

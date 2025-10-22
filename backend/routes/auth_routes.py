@@ -1,44 +1,15 @@
-from flask import Blueprint, request, jsonify
-from models import db, Users
+from flask import Blueprint, jsonify, session
 
-auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
+profile_routes = Blueprint("profile_routes", __name__)
 
-@auth_bp.route("/signup", methods=["POST"])
-def signup():
-    data = request.get_json()
+# Keep only non-duplicated, ancillary routes here. Core profile and auth
+# endpoints are implemented in the main app to avoid duplication.
 
-    # Extract payload
-    full_name = data.get("full_name")
-    email = data.get("email")
-    password = data.get("password")
-    mobile_number = data.get("mobile_number")
+@profile_routes.route("/api/contact_owner", methods=["POST"])
+def contact_owner():
+    user = session.get("user")
+    if not user:
+        return jsonify({"error": "Unauthorized. Please log in to contact the owner."}), 401
 
-    # Basic validation
-    if not all([full_name, email, password, mobile_number]):
-        return jsonify({"error": "All fields are required"}), 400
-
-    # Check if email exists
-    if Users.query.filter_by(email=email).first():
-        return jsonify({"error": "Email already registered"}), 400
-
-    try:
-        # Create user
-        user = Users(
-            full_name=full_name,
-            email=email,
-            mobile_number=mobile_number
-        )
-        user.set_password(password)  # hash password
-
-        db.session.add(user)
-        db.session.commit()
-
-        return jsonify({
-            "message": "Signup successful",
-            "user_id": user.user_id
-        }), 201
-
-    except Exception as e:
-        print("Signup error:", e)  # ✅ see exact error in console
-        db.session.rollback()
-        return jsonify({"error": "Signup failed"}), 500
+    # Placeholder for contact owner logic (e.g., send email/notification)
+    return jsonify({"success": True, "message": "Contact request sent successfully."})

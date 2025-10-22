@@ -1,126 +1,241 @@
-document.addEventListener("DOMContentLoaded", async () => {
-    let user = {}; // Will store fetched user info
+// --- Fetch User Properties ---
+async function loadProperties() {
+  try {
+    const res = await fetch('/api/myproperties');
+    if (!res.ok) throw new Error("Failed to fetch properties");
+    const data = await res.json();
+    const list = document.getElementById('propertiesList');
+    list.innerHTML = '';
 
-    const profileName = document.getElementById("profileName");
-    const profileEmail = document.getElementById("profileEmail");
-    const profilePhone = document.getElementById("profilePhone");
-
-    // Fetch user info from backend
-    async function fetchUserProfile() {
-        try {
-            const res = await fetch("/api/profile");
-            if (!res.ok) throw new Error("Failed to fetch profile");
-            user = await res.json();
-
-            profileName.innerText = user.full_name || "N/A";
-            profileEmail.innerText = user.email || "N/A";
-            profilePhone.innerText = user.mobile_number || "Not Provided";
-        } catch (err) {
-            console.error(err);
-            profileName.innerText = "N/A";
-            profileEmail.innerText = "N/A";
-            profilePhone.innerText = "Not Provided";
-        }
+    window._propsCache = [];
+    const properties = data.properties || [];
+    
+    // Show empty state message if no properties
+    if (properties.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <p>Your property list is empty — add one to get started!</p>
+          <a href="/postproperty" class="post-property-btn">Post Property</a>
+        </div>
+      `;
+      return;
     }
-
-    await fetchUserProfile();
-
-    // Edit profile modal
-    const editBtn = document.getElementById("editProfileBtn");
-    const editModal = document.getElementById("editProfileModal");
-    const closeModal = document.getElementById("closeModal");
-    const editForm = document.getElementById("editProfileForm");
-    const editName = document.getElementById("editName");
-    const editPhone = document.getElementById("editPhone");
-
-    editBtn.addEventListener("click", () => {
-        editName.value = user.full_name || "";
-        editPhone.value = user.mobile_number || "";
-        editModal.style.display = "flex";
+    
+    properties.forEach(p => {
+      window._propsCache.push(p);
+      const card = document.createElement('div');
+      card.className = 'property-card';
+      card.innerHTML = `
+        <h4>${p.address}, ${p.area}, ${p.city}, ${p.district}</h4>
+        <p>Type: ${p.property_type} | ${p.house_type}</p>
+        <p>Rent: ₹${p.rent_price}</p>
+        <p>Parking: ${p.car_parking} | Pets: ${p.pets}</p>
+        <p>Furnishing: ${p.furnishing} | Facing: ${p.facing}</p>
+        <p>Status: <strong>${p.status}</strong></p>
+        <div class="property-actions">
+          <div class="status-toggle">
+            <label class="switch">
+              <input type="checkbox" ${p.status === 'Available' ? 'checked' : ''} onchange="toggleStatus(${p.property_id}, this.checked)">
+              <span class="slider"></span>
+            </label>
+            <span class="status-text">${p.status}</span>
+          </div>
+          <button class="edit-btn" onclick='openEditModal(${p.property_id})'>Edit</button>
+          <button class="delete-btn" onclick="deleteProperty(${p.property_id})">Delete</button>
+        </div>
+      `;
+      list.appendChild(card);
     });
+  } catch (err) {
+    console.error("Failed to load properties:", err);
+  }
+}
 
-    closeModal.addEventListener("click", () => editModal.style.display = "none");
-    window.addEventListener("click", e => { if(e.target === editModal) editModal.style.display="none"; });
+// --- Edit Property Modal ---
+function openEditModal(id) {
+  const prop = (window._propsCache || []).find(x => x.property_id === id);
+  if (!prop) return;
+  
+  // Populate form with current values
+  document.getElementById('editPropertyId').value = prop.property_id;
+  document.getElementById('editFullName').value = prop.full_name;
+  document.getElementById('editMobile').value = prop.mobile_number;
+  document.getElementById('editAddress').value = prop.address;
+  document.getElementById('editCity').value = prop.city;
+  document.getElementById('editArea').value = prop.area;
+  document.getElementById('editDistrict').value = prop.district;
+  document.getElementById('editPropertyType').value = prop.property_type;
+  document.getElementById('editHouseType').value = prop.house_type;
+  document.getElementById('editRentPrice').value = prop.rent_price;
+  document.getElementById('editCarParking').value = prop.car_parking;
+  document.getElementById('editPets').value = prop.pets;
+  document.getElementById('editFacing').value = prop.facing;
+  document.getElementById('editFurnishing').value = prop.furnishing;
+  document.getElementById('editDescription').value = prop.description || '';
+  
+  document.getElementById('editPropertyModal').style.display = 'flex';
+}
 
-    // Update profile submit
-    editForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const updatedName = editName.value.trim();
-        const updatedPhone = editPhone.value.trim();
+function closeEditModal() {
+  document.getElementById('editPropertyModal').style.display = 'none';
+}
 
-        try {
-            const res = await fetch("/api/profile", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ full_name: updatedName, mobile_number: updatedPhone })
-            });
-            const data = await res.json();
-            if (data.success) {
-                alert("Profile updated successfully!");
-                await fetchUserProfile(); // Refresh user info
-                editModal.style.display = "none";
-            } else {
-                alert("Error: " + data.message);
-            }
-        } catch (err) {
-            console.error(err);
-            alert("Something went wrong!");
-        }
+async function updateProperty(id, payload) {
+  try {
+    const res = await fetch(`/api/property/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
+    const data = await res.json();
+    if (data.success) {
+      loadProperties();
+      closeEditModal();
+      showNotification('Property updated successfully', 'success');
+    } else {
+      alert(data.error || 'Failed to update property');
+    }
+  } catch (e) {
+    console.error(e);
+    alert('Error updating property');
+  }
+}
 
-    // Load user's properties
-    window.fetchUserProperties = async function() {
-        const propertiesContainer = document.getElementById("userProperties");
-        try {
-            const res = await fetch("/api/user/properties");
-            const data = await res.json();
-            propertiesContainer.innerHTML = "";
-            if (data.length === 0) {
-                propertiesContainer.innerHTML = "<p>No properties posted yet.</p>";
-                return;
-            }
-            data.forEach(p => {
-                const card = document.createElement("div");
-                card.className = "property-card";
-                card.innerHTML = `
-                    <h4>${p.property_type} - ${p.house_type}</h4>
-                    <p>₹${parseInt(p.rent_price).toLocaleString()}</p>
-                    <p>${p.address}, ${p.district}</p>
-                    <p>Status: <span id="status-${p.property_id}">${p.status}</span></p>
-                    <button onclick="toggleStatus(${p.property_id})">Toggle Status</button>
-                `;
-                propertiesContainer.appendChild(card);
-            });
-        } catch (err) {
-            console.error(err);
-            propertiesContainer.innerHTML = "<p>Error loading properties.</p>";
-        }
-    };
+// --- Delete Profile ---
+async function deleteProfile() {
+  if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) return;
+  
+  try {
+    const res = await fetch('/api/profile', { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      alert('Account deleted successfully');
+      window.location.href = '/';
+    } else {
+      alert(data.error || 'Failed to delete account');
+    }
+  } catch (e) {
+    console.error(e);
+    alert('Error deleting account');
+  }
+}
 
-    await fetchUserProperties();
+// --- Notification System ---
+function showNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.textContent = message;
+  notification.style.cssText = `
+    position: fixed; top: 20px; right: 20px; z-index: 10000;
+    padding: 15px 20px; border-radius: 5px; color: white;
+    background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#2196F3'};
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  `;
+  document.body.appendChild(notification);
+  setTimeout(() => notification.remove(), 3000);
+}
+
+// --- Toggle Property Status ---
+async function toggleStatus(id, isAvailable) {
+  const status = isAvailable ? 'Available' : 'Unavailable';
+  try {
+    const res = await fetch(`/api/property/${id}/status`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({status})
+    });
+    const data = await res.json();
+    if(data.success) {
+      loadProperties();
+      showNotification(`Property status updated to ${status}`, 'success');
+    } else {
+      alert(data.error || "Failed to update status");
+    }
+  } catch (err) { 
+    console.error(err); 
+    alert("Error updating status"); 
+  }
+}
+
+// --- Delete Property ---
+async function deleteProperty(id) {
+  if(!confirm("Delete this property?")) return;
+  try {
+    const res = await fetch(`/api/property/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if(data.success) loadProperties();
+    else alert(data.error || "Failed to delete property");
+  } catch(err) { console.error(err); alert("Error deleting property"); }
+}
+
+// --- Profile Modal ---
+function openModal() {
+  const modal = document.getElementById('editProfileModal');
+  modal.style.display = 'flex';
+  document.getElementById('editName').value = document.getElementById('profileName').textContent;
+  document.getElementById('editEmail').value = document.getElementById('profileEmail').textContent;
+  document.getElementById('editMobile').value = document.getElementById('profileMobile').textContent;
+}
+
+function closeModal() { 
+  document.getElementById('editProfileModal').style.display = 'none'; 
+}
+window.onclick = e => { if(e.target == document.getElementById('editProfileModal')) closeModal(); }
+
+// --- Update Profile ---
+document.getElementById('editProfileForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const data = {
+    full_name: document.getElementById('editName').value,
+    email: document.getElementById('editEmail').value,
+    mobile_number: document.getElementById('editMobile').value,
+    password: document.getElementById('editPassword').value
+  };
+  try {
+    const res = await fetch('/api/profile', {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if(result.success) {
+      document.getElementById('profileName').textContent = data.full_name;
+      document.getElementById('profileEmail').textContent = data.email;
+      document.getElementById('profileMobile').textContent = data.mobile_number;
+      closeModal();
+      alert(result.message);
+    } else alert(result.error || "Failed to update profile");
+  } catch(err) { console.error(err); alert("Error updating profile"); }
 });
 
-// Make toggleStatus globally accessible
-async function toggleStatus(id) {
-    const currentStatus = document.getElementById(`status-${id}`).innerText;
-    const newStatus = currentStatus === "Available" ? "Unavailable" : "Available";
-
-    try {
-        const res = await fetch(`/api/properties/${id}/status`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: newStatus })
-        });
-        const data = await res.json();
-        if (data.success) {
-            alert(`Property marked as ${newStatus}`);
-            window.fetchUserProperties(); // refresh profile property list
-            if (typeof fetchProperties === "function") fetchProperties(); // refresh explore page if exists
-        } else {
-            alert("Failed to update status");
-        }
-    } catch (err) {
-        console.error(err);
-        alert("Something went wrong!");
-    }
+// --- Logout ---
+async function logout() {
+  await fetch('/logout');
+  window.location.href = '/';
 }
+
+// --- Edit Property Form Handler ---
+document.getElementById('editPropertyForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const id = document.getElementById('editPropertyId').value;
+  const data = {
+    full_name: document.getElementById('editFullName').value,
+    mobile_number: document.getElementById('editMobile').value,
+    address: document.getElementById('editAddress').value,
+    city: document.getElementById('editCity').value,
+    area: document.getElementById('editArea').value,
+    district: document.getElementById('editDistrict').value,
+    property_type: document.getElementById('editPropertyType').value,
+    house_type: document.getElementById('editHouseType').value,
+    rent_price: document.getElementById('editRentPrice').value,
+    car_parking: document.getElementById('editCarParking').value,
+    pets: document.getElementById('editPets').value,
+    facing: document.getElementById('editFacing').value,
+    furnishing: document.getElementById('editFurnishing').value,
+    description: document.getElementById('editDescription').value
+  };
+  await updateProperty(id, data);
+});
+
+// --- Initial Load ---
+loadProperties();

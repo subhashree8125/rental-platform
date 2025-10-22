@@ -61,7 +61,8 @@ function renderExploreProperties(properties) {
     card.classList.add("property-card");
     card.innerHTML = `
       <h3>${p.full_name}</h3>
-      <p>${p.address}, ${p.district}</p>
+      <p>${p.address}</p>
+      <p>${p.city}, ${p.district}</p>
       <p>Type: ${p.property_type} | ${p.house_type}</p>
       <p>Rent: ₹${p.rent_price}</p>
       <p>Parking: ${p.car_parking} | Pets: ${p.pets}</p>
@@ -115,11 +116,9 @@ async function postProperty(event) {
     }
 
     if (response.ok) {
-      msgBox.textContent = "✅ Property posted successfully!";
-      msgBox.style.background = "#d4edda";
-      msgBox.style.color = "#155724";
-      msgBox.style.border = "1px solid #c3e6cb";
-
+      // Show success popup with BROKLINK theme
+      showSuccessPopup();
+      
       form.reset();
       const fileLabel = document.getElementById("file-name");
       if (fileLabel) fileLabel.textContent = "Browse Images";
@@ -139,6 +138,44 @@ async function postProperty(event) {
     msgBox.style.color = "#856404";
     msgBox.style.border = "1px solid #ffeeba";
   }
+}
+
+// --- Success Popup Function ---
+function showSuccessPopup() {
+  const popup = document.createElement('div');
+  popup.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8); z-index: 10000; display: flex;
+    align-items: center; justify-content: center; font-family: 'Poppins', sans-serif;
+  `;
+  
+  popup.innerHTML = `
+    <div style="
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      padding: 40px; border-radius: 15px; text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      max-width: 400px; width: 90%;
+    ">
+      <div style="font-size: 48px; margin-bottom: 20px;">🎉</div>
+      <h2 style="color: #000; margin: 0 0 15px 0; font-size: 24px;">Posted Your Property Successfully!</h2>
+      <p style="color: #333; margin: 0 0 20px 0;">Redirecting to explore page...</p>
+      <div style="
+        width: 40px; height: 40px; border: 4px solid #000;
+        border-top: 4px solid transparent; border-radius: 50%;
+        animation: spin 1s linear infinite; margin: 0 auto;
+      "></div>
+    </div>
+    <style>
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+  `;
+  
+  document.body.appendChild(popup);
+  
+  setTimeout(() => {
+    document.body.removeChild(popup);
+    window.location.href = '/explore';
+  }, 3000);
 }
 
 document.getElementById("postPropertyForm").addEventListener("submit", postProperty);

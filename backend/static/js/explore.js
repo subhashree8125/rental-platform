@@ -21,6 +21,7 @@ async function fetchProperties(filters = {}) {
     if (Object.keys(filters).length === 0) {
       fillDistricts(properties);
       fillBHK(properties);
+      initCitiesPanel();
       initAreasPanel();
       fillCarParking();
       fillPets();
@@ -43,6 +44,7 @@ function renderProperties(list) {
       "<p style='grid-column:1/-1;text-align:center;font-size:18px;color:#555;'>No properties found.</p>";
     return;
   }
+  console.log(list);
   list.forEach((p) => {
     const card = document.createElement("div");
     card.className = "property-card";
@@ -53,10 +55,11 @@ function renderProperties(list) {
     card.innerHTML = `
       <img src="${imageUrl}" alt="">
       <div class="property-info">
-        <h4>${p.property_type} - ${p.house_type}</h4>
+        <h4>${p.full_name} - ${p.property_type} - ${p.house_type}</h4>
         <p><strong>₹${p.rent_price}</strong>/month</p>
-        <p>${p.address}, ${p.district}</p>
-        <p>${p.description || ""}</p>
+        <p>${p.address}</p>
+        <p>${p.area}, ${p.city}, ${p.district}</p>
+        <p class="desc" style="display:none;">${p.description || ""}</p>
       </div>`;
     card.onclick = () => openModal(p);
     gallery.appendChild(card);
@@ -72,21 +75,36 @@ function openModal(p) {
   currentImageIndex = 0;
   updateCarousel();
 
-  document.getElementById("modalTitle").innerText = `${p.property_type} - ${p.house_type}`;
+  document.getElementById("modalTitle").innerText = `${p.full_name} - ${p.property_type} - ${p.house_type}`;
   document.getElementById("modalType").innerText = p.property_type;
   document.getElementById("modalBHK").innerText = p.house_type;
   document.getElementById("modalPrice").innerText = parseFloat(p.rent_price).toLocaleString();
+
+  document.getElementById("modalCity").innerText = p.city;
+  document.getElementById("modalArea").innerText = p.area;
   document.getElementById("modalDistrict").innerText = p.district;
   document.getElementById("modalAddress").innerText = p.address;
   document.getElementById("modalDesc").innerText = p.description || "No description available.";
   document.getElementById("propertyModal").style.display = "flex";
 }
 
-document.getElementById("contactBtn").addEventListener("click", () => {
-  if (selectedProperty && selectedProperty.mobile_number) {
-    alert("📞 Owner Contact: " + selectedProperty.mobile_number);
-  } else {
-    alert("Owner contact is only available after login.");
+document.getElementById("contactBtn").addEventListener("click", async () => {
+  if (!selectedProperty) return;
+  try {
+    const res = await fetch(`/api/property/${selectedProperty.property_id}/contact`);
+    const data = await res.json();
+    if (res.ok && data.success) {
+      // Open phone dialer
+      window.location.href = `tel:${data.mobile_number}`;
+    } else if (res.status === 401) {
+      alert("Please login to contact the owner.");
+      window.location.href = "/login";
+    } else {
+      alert(data.error || "Failed to fetch contact");
+    }
+  } catch (e) {
+    console.error(e);
+    alert("Failed to fetch contact");
   }
 });
 
@@ -133,11 +151,37 @@ function fillDistricts(list) {
     panel.appendChild(label);
   });
 
-  // Event: when selecting a district → update areas
+  // Event: when selecting a district → update cities and areas
   panel.querySelectorAll("input[name='district']").forEach((input) => {
     input.addEventListener("change", (e) => {
+      updateCities(e.target.value);
       updateAreas(e.target.value);
     });
+  });
+}
+
+function initCitiesPanel() {
+  document.getElementById("cityPanel").innerHTML = "<p>Select a district first</p>";
+}
+
+function updateCities(selectedDistrict) {
+  const panel = document.getElementById("cityPanel");
+  const citiesInDistrict = [...new Set(
+    properties
+    .filter((p) => p.district === selectedDistrict)
+    .map((p) => p.city)
+  )].sort();
+
+  if (citiesInDistrict.length === 0) {
+    panel.innerHTML = "<p>No cities available for this district</p>";
+    return;
+  }
+
+  panel.innerHTML = "";
+  citiesInDistrict.forEach((city) => {
+    const label = document.createElement("label");
+    label.innerHTML = `<input type="checkbox" value="${city}"> ${city}`;
+    panel.appendChild(label);
   });
 }
 
@@ -151,7 +195,7 @@ function updateAreas(selectedDistrict) {
 
   const areas = properties
     .filter((p) => p.district === selectedDistrict)
-    .map((p) => p.address);
+    .map((p) => p.area);
   const uniqueAreas = [...new Set(areas)].sort();
 
   if (uniqueAreas.length === 0) {
@@ -218,6 +262,7 @@ function fillFurnishing() {
 // Apply filter button
 // ---------------------
 document.getElementById("applyFilterBtn").addEventListener("click", () => {
+  const selectedCities = Array.from(document.querySelectorAll("#cityPanel input:checked")).map(el => el.value);
   const selectedDistricts = Array.from(document.querySelectorAll("#districtPanel input:checked")).map(el => el.value);
   const selectedAreas = Array.from(document.querySelectorAll("#areasPanel input:checked")).map(el => el.value);
   const selectedPropertyTypes = Array.from(document.querySelectorAll("input[value=House]:checked, input[value=Flat]:checked, input[value=PG]:checked, input[value=Hostel]:checked")).map(el => el.value);
@@ -233,6 +278,7 @@ document.getElementById("applyFilterBtn").addEventListener("click", () => {
   const furnishing = Array.from(document.querySelectorAll("#furnishingPanel input:checked")).map(el => el.value);
 
   const filters = {
+    cities: selectedCities,
     districts: selectedDistricts,
     areas: selectedAreas,
     propertyTypes: selectedPropertyTypes,
@@ -266,7 +312,8 @@ document.getElementById("clearFilterBtn").addEventListener("click", () => {
   document.querySelectorAll("#carParkingPanel input, #petsPanel input").forEach(cb => cb.checked = false);
   document.querySelectorAll("#facingPanel input, #furnishingPanel input").forEach(cb => cb.checked = false);
 
-  // Reset Areas panel
+  // Reset Cities and Areas panels
+  initCitiesPanel();
   initAreasPanel();
 
   // Render all properties

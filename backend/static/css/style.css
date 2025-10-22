@@ -187,3 +187,40 @@ header {
     color: #ddd;
     text-decoration: none;
 }
+
+/* Updated styles for Home and Logout buttons */
+.header-buttons a,
+.header-buttons button {
+  margin-left: 15px;
+  padding: 8px 15px;
+  background: #ffc107;
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.header-buttons a:hover,
+.header-buttons button:hover {
+  background: #e6b800;
+}
+
+/* Alert styles for success and error messages */
+.alert {
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.alert-success {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.alert-error {
+  background-color: #dc3545;
+  color: #fff;
+}
