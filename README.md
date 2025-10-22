@@ -249,27 +249,25 @@ docker run -p 5002:5002 broklink
 ```
 
 ## 🤝 Contributing
-
-This is a student project for SIET AIDS. Contributions, issues, and feature requests are welcome!
+Contributions, issues, and feature requests are welcome to improve the project.
 
 ## 📝 License
-
-This project is for educational purposes as part of the SIET AIDS program.
+This project is for educational purposes and is not licensed for commercial use.
 
 ## 👥 Authors
 
-- **Team BROKLINK** - SIET AIDS Project
-
-## 🙏 Acknowledgments
-
-- SIET (Sri Eshwar Institute of Technology)
-- AIDS Department
-- Project Guide and Faculty
+- **Team BROKLINK** 
+- HARIPRASATH C
+- SUBHASHREE R
+- SHANMATHY SN
 
 ## 📞 Support
+- hariprasathcemail@gmail.com
+- subhashreeradhakrishnan.8@gmail.com
+- shanmathynarayanan.31@gmail.com
 
 For support or queries, please contact the development team through the repository issues page.
 
 ---
 
-**Made with ❤️ by SIET AIDS Students**
+** Powered by Team TriTry❤️ **
