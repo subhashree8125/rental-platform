@@ -58,7 +58,7 @@ function renderProperties(list) {
         <h4>${p.full_name} - ${p.property_type} - ${p.house_type}</h4>
         <p><strong>₹${p.rent_price}</strong>/month</p>
         <p>${p.address}</p>
-        <p>${p.area}, ${p.city}, ${p.district}</p>
+        <p>${p.area}, ${p.city}</p>
         <p class="desc" style="display:none;">${p.description || ""}</p>
       </div>`;
     card.onclick = () => openModal(p);
@@ -316,8 +316,8 @@ document.getElementById("clearFilterBtn").addEventListener("click", () => {
   initCitiesPanel();
   initAreasPanel();
 
-  // Render all properties
-  renderProperties(properties);
+  // Fetch all properties without any filters (refresh the page data)
+  fetchProperties();
 });
 
 
